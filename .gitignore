@@ -1,0 +1,23 @@
+# macOS
+.DS_Store
+
+# 字节码
+*.class
+
+# 数据集
+*.csv
+
+# PyTorch 摩西
+*.pt
+*.pth
+
+# IDEA
+*.jar
+*.iml
+*.log
+*.properties
+.idea
+
+# 目录
+src/main/resources
+target/
