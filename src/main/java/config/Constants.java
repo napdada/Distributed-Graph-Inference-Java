@@ -24,12 +24,14 @@ public class Constants {
      */
     public static final String SPARK_MASTER = "local";
 
+    public static final String RESOURCE_PATH = "/Users/panpan/Documents/Code/Java/spark/src/main/resources/";
     /**
      * 数据集存储路径
      */
-    public static final String DATASET_PATH = "./src/main/resources/dataset/test.csv";
-//    public static final String DATASET_PATH = "./src/main/resources/dataset/wikipedia.csv";
-//    public static final String DATASET_PATH = "./src/main/resources/dataset/reddit.csv";
+    public static final String DATASET_PATH = RESOURCE_PATH + "dataset/test100.csv";
+//    public static final String DATASET_PATH = RESOURCE_PATH + "dataset/test1000.csv";
+//    public static final String DATASET_PATH = RESOURCE_PATH + "dataset/wikipedia.csv";
+//    public static final String DATASET_PATH = RESOURCE_PATH + "dataset/reddit.csv";
     /**
      * 点边特征维度
      */
@@ -58,7 +60,7 @@ public class Constants {
     /**
      * Pytorch 模型存储路径
      */
-    public static final String MODEL_PATH = "./src/main/resources/model";
+    public static final String MODEL_PATH = RESOURCE_PATH + "model";
     /**
      * Pytorch 模型名称
      */
@@ -70,7 +72,7 @@ public class Constants {
     /**
      * Pytorch 模型推理结果存储路径
      */
-    public static final String RESULT_PATH = "./src/main/resources/result/wikipedia.csv";
+    public static final String RESULT_PATH = RESOURCE_PATH + "result/wikipedia.csv";
     /**
      * Encoder 中是否使用 time embedding
      */
