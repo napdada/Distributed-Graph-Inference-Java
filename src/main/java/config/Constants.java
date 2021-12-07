@@ -15,6 +15,18 @@ import scala.reflect.ClassTag$;
  * @version : v 0.1 2021/11/3 2:44 下午
  */
 public class Constants {
+
+    public Constants(String[] args) {
+        RESOURCE_PATH = args[0];
+        DATASET_NAME = args[1];
+        DATASET_PATH = RESOURCE_PATH + "dataset/" + DATASET_NAME + ".csv";
+        MODEL_PATH = RESOURCE_PATH + "model";
+        TASK_NAME = args[2];
+        ENCODER_NAME = "Encoder_" + DATASET_NAME + "_" + TASK_NAME;
+        DECODER_NAME = "Decoder_" + DATASET_NAME + "_" + TASK_NAME;
+        RESULT_PATH = RESOURCE_PATH + "result/" + DATASET_NAME + ".csv";
+    }
+
     /**
      * Spark 应用名
      */
@@ -24,14 +36,18 @@ public class Constants {
      */
     public static final String SPARK_MASTER = "local";
 
-    public static final String RESOURCE_PATH = "/Users/panpan/Documents/Code/Java/spark/src/main/resources/";
+    /**
+     * 静态资源存储路径
+     */
+    public static String RESOURCE_PATH = "/Users/panpan/Documents/Code/Java/spark/src/main/resources/";
+    /**
+     * 数据集名称
+     */
+    public static String DATASET_NAME = "test100";
     /**
      * 数据集存储路径
      */
-//    public static final String DATASET_PATH = RESOURCE_PATH + "dataset/test100.csv";
-    public static final String DATASET_PATH = RESOURCE_PATH + "dataset/test1000.csv";
-//    public static final String DATASET_PATH = RESOURCE_PATH + "dataset/wikipedia.csv";
-//    public static final String DATASET_PATH = RESOURCE_PATH + "dataset/reddit.csv";
+    public static String DATASET_PATH = RESOURCE_PATH + "dataset/" + DATASET_NAME + ".csv";
     /**
      * 点边特征维度
      */
@@ -60,11 +76,19 @@ public class Constants {
     /**
      * Pytorch 模型存储路径
      */
-    public static final String MODEL_PATH = RESOURCE_PATH + "model";
+    public static String MODEL_PATH = RESOURCE_PATH + "model";
     /**
-     * Pytorch 模型名称
+     * Pytorch 模型任务（LP、EC、NC）
      */
-    public static final String MODEL_NAME = "Encoder_wikipedia_LP.pt";
+    public static String TASK_NAME = "LP";
+    /**
+     * Pytorch Encoder 模型名称
+     */
+    public static String ENCODER_NAME = "Encoder_" + DATASET_NAME + "_" + TASK_NAME + ".pt";
+    /**
+     * Pytorch Decoder 模型名称
+     */
+    public static String DECODER_NAME = "Decoder_" + DATASET_NAME + "_" + TASK_NAME + ".pt";
     /**
      * Pytorch 模型推理结果题头索引
      */
@@ -72,7 +96,7 @@ public class Constants {
     /**
      * Pytorch 模型推理结果存储路径
      */
-    public static final String RESULT_PATH = RESOURCE_PATH + "result/wikipedia.csv";
+    public static String RESULT_PATH = RESOURCE_PATH + "result/" + DATASET_NAME + ".csv";
     /**
      * Encoder 中是否使用 time embedding
      */
