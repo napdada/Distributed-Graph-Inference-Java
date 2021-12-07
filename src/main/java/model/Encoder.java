@@ -12,7 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Pytorch 模型定义
+ * Pytorch Encoder 模型定义
  *
  * @author napdada
  * @version : v 0.1 2021/11/15 4:32 下午
@@ -49,7 +49,7 @@ public class Encoder {
 
     private Encoder() {
         modelPath = Constants.MODEL_PATH;
-        modelName = Constants.MODEL_NAME;
+        modelName = Constants.ENCODER_NAME;
         model = Model.newInstance(modelName);
         Path modelDir = Paths.get(modelPath);
         try {
@@ -64,6 +64,7 @@ public class Encoder {
     public static Encoder getInstance() {
         return encoder;
     }
+
     /**
      * 模型推理
      * @param encoderInput 模型输入

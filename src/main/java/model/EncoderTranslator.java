@@ -28,7 +28,7 @@ public class EncoderTranslator implements Translator<EncoderInput, EncoderOutput
     }
 
     /**
-     * 处理 Pytorch 模型输入
+     * 处理 Pytorch Encoder 模型输入
      * @param ctx TranslatorContext
      * @param input 自定义的模型输入 EncoderInput
      * @return ndList
@@ -48,7 +48,7 @@ public class EncoderTranslator implements Translator<EncoderInput, EncoderOutput
     }
 
     /**
-     * 处理 Pytorch 模型输出
+     * 处理 Pytorch Encoder 模型输出
      * @note 在 Translator 中创建的 NDList 将在 predict() 之后立即销毁，因此需要自定义模型输出，并且调用 duplicate() 防止浅拷贝
      * @param ctx TranslatorContext
      * @param list NDList

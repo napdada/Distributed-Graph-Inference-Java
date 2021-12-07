@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * Pytorch 模型自定义输出
+ * Pytorch Encoder 模型自定义输出
  *
  * @author napdada
  * @version : v 0.1 2021/11/15 5:35 下午

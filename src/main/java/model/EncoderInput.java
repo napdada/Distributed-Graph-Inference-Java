@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 /**
- * Pytorch 模型自定义输入
+ * Pytorch Encoder 模型自定义输入
  *
  * @author napdada
  * @version : v 0.1 2021/11/15 4:27 下午
