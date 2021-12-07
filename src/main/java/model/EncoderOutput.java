@@ -21,27 +21,27 @@ import java.util.Arrays;
  */
 @Getter
 @Setter
-public class OutputData implements Serializable {
+public class EncoderOutput implements Serializable {
     /**
      * Log
      */
-    private static final Logger logger = LoggerFactory.getLogger(OutputData.class);
+    private static final Logger logger = LoggerFactory.getLogger(EncoderOutput.class);
     /**
      * 模型输出 embedding
      */
     private float[][] embedding;
 
-    public OutputData() {
+    public EncoderOutput() {
 
     }
 
-    public OutputData(float[][] embedding) {
+    public EncoderOutput(float[][] embedding) {
         this.embedding = embedding;
     }
 
     @Override
     public String toString() {
-        return "OutputData{" +
+        return "EncoderOutput{" +
                 "embedding=" + Arrays.toString(embedding) +
                 '}';
     }

@@ -4,8 +4,8 @@ import dataset.Vdata;
 import dataset.Vfeat;
 import lombok.Getter;
 import lombok.Setter;
-import model.InputData;
-import model.OutputData;
+import model.EncoderInput;
+import model.EncoderOutput;
 import model.Encoder;
 import scala.runtime.AbstractFunction2;
 
@@ -49,11 +49,11 @@ public class UpdateFeat extends AbstractFunction2<Object, Vdata, Vdata> implemen
                 i++;
             }
             Encoder encoder = Encoder.getInstance();
-            InputData inputData = new InputData(feat, mail, lastUpdate, timestamp);
-            OutputData outputData = encoder.infer(inputData);
+            EncoderInput encoderInput = new EncoderInput(feat, mail, lastUpdate, timestamp);
+            EncoderOutput encoderOutput = encoder.infer(encoderInput);
 
             for (int j = 0; j < index.length; j++) {
-                embedding.put(index[j], outputData.getEmbedding()[j]);
+                embedding.put(index[j], encoderOutput.getEmbedding()[j]);
             }
             Vdata vdata = new Vdata((Long) vID, v, embedding);
             vdata.setFeat(embedding.get((Long) vID));

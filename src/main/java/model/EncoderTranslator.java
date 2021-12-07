@@ -15,7 +15,7 @@ import java.util.Arrays;
  * @author napdada
  * @version : v 0.1 2021/11/29 8:46 下午
  */
-public class PyTranslator implements Translator<InputData, OutputData> {
+public class EncoderTranslator implements Translator<EncoderInput, EncoderOutput> {
 
     /**
      * The Batchifier describes how to combine a batch together
@@ -30,11 +30,11 @@ public class PyTranslator implements Translator<InputData, OutputData> {
     /**
      * 处理 Pytorch 模型输入
      * @param ctx TranslatorContext
-     * @param input 自定义的模型输入 InputData
+     * @param input 自定义的模型输入 EncoderInput
      * @return ndList
      */
     @Override
-    public NDList processInput(TranslatorContext ctx, InputData input) {
+    public NDList processInput(TranslatorContext ctx, EncoderInput input) {
         NDManager manager = ctx.getNDManager();
         NDArray featArray = manager.create(input.getFeat());
         NDArray mailArray = manager.create(input.flatMail(), new Shape(input.getMail().length, Constants.MAILBOX_LEN, input.getMailDim()));
@@ -52,10 +52,10 @@ public class PyTranslator implements Translator<InputData, OutputData> {
      * @note 在 Translator 中创建的 NDList 将在 predict() 之后立即销毁，因此需要自定义模型输出，并且调用 duplicate() 防止浅拷贝
      * @param ctx TranslatorContext
      * @param list NDList
-     * @return 自定义的模型输出 OutputData
+     * @return 自定义的模型输出 EncoderOutput
      */
     @Override
-    public OutputData processOutput(TranslatorContext ctx, NDList list) {
+    public EncoderOutput processOutput(TranslatorContext ctx, NDList list) {
         NDArray ndArray = list.get(0).duplicate();
         float[] output= ndArray.toFloatArray();
         int num = output.length / Constants.FEATURE_DIM, from, to;
@@ -65,7 +65,7 @@ public class PyTranslator implements Translator<InputData, OutputData> {
             to = from + Constants.FEATURE_DIM;
             embedding[i] = Arrays.copyOfRange(output, from, to);
         }
-        return new OutputData(embedding);
+        return new EncoderOutput(embedding);
     }
 
 }

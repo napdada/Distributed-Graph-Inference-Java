@@ -4,10 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import config.Constants;
 import lombok.Getter;
 import lombok.Setter;
-import model.Encoder;
-import model.InputData;
-import model.OutputData;
-import scala.Tuple2;
+import model.EncoderInput;
 
 import java.io.Serializable;
 import java.util.*;
@@ -153,7 +150,7 @@ public class Vdata implements Serializable {
         }
     }
 
-    public InputData subGraphToInputdata() {
+    public EncoderInput subGraphToInputdata() {
         int vNum = eventSubgraph2DFeat.size(), i = 0;
         float[][] feat = new float[vNum][];
         float[][][] mail = new float[vNum][][];
@@ -166,7 +163,7 @@ public class Vdata implements Serializable {
             timestamp[i] = entry.getValue().getTimestamp();
             i++;
         }
-        return new InputData(feat, mail, lastUpdate, timestamp);
+        return new EncoderInput(feat, mail, lastUpdate, timestamp);
     }
 
     /**

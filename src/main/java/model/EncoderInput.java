@@ -16,7 +16,7 @@ import java.util.Arrays;
  */
 @Getter
 @Setter
-public class InputData implements Serializable {
+public class EncoderInput implements Serializable {
     /**
      * 点特征
      */
@@ -42,11 +42,11 @@ public class InputData implements Serializable {
      */
     private int mailDim;
 
-    public InputData() {
+    public EncoderInput() {
 
     }
 
-    public InputData(float[][] feat, float[][][] mail, float[] lastUpdate, float[] timestamp) {
+    public EncoderInput(float[][] feat, float[][][] mail, float[] lastUpdate, float[] timestamp) {
         this.featDim = Constants.FEATURE_DIM;
         this.mailDim = Constants.FEATURE_DIM;
         if (Constants.TIME_EMBEDDING) {
@@ -77,7 +77,7 @@ public class InputData implements Serializable {
 
     @Override
     public String toString() {
-        return "InputData{" +
+        return "EncoderInput{" +
                 "feat=" + Arrays.toString(feat) +
                 ", mail=" + Arrays.toString(mail) +
                 ", lastUpdate=" + Arrays.toString(lastUpdate) +

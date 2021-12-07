@@ -39,11 +39,11 @@ public class Encoder {
     /**
      * 模型输入 Translator
      */
-    PyTranslator translator;
+    EncoderTranslator translator;
     /**
      * 模型预测
      */
-    Predictor<InputData, OutputData> predictor;
+    Predictor<EncoderInput, EncoderOutput> predictor;
 
     private static Encoder encoder = new Encoder();
 
@@ -54,7 +54,7 @@ public class Encoder {
         Path modelDir = Paths.get(modelPath);
         try {
             model.load(modelDir);
-            translator = new PyTranslator();
+            translator = new EncoderTranslator();
             predictor = model.newPredictor(translator);
         } catch (Exception e) {
             e.printStackTrace();
@@ -66,12 +66,12 @@ public class Encoder {
     }
     /**
      * 模型推理
-     * @param inputData 模型输入
-     * @return OutputData 模型输出
+     * @param encoderInput 模型输入
+     * @return EncoderOutput 模型输出
      */
-    public OutputData infer(InputData inputData) {
+    public EncoderOutput infer(EncoderInput encoderInput) {
         try {
-            return predictor.predict(inputData);
+            return predictor.predict(encoderInput);
         } catch (Exception e) {
             logger.error(e.getMessage());
             return null;

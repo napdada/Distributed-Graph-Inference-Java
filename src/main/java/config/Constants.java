@@ -28,8 +28,8 @@ public class Constants {
     /**
      * 数据集存储路径
      */
-    public static final String DATASET_PATH = RESOURCE_PATH + "dataset/test100.csv";
-//    public static final String DATASET_PATH = RESOURCE_PATH + "dataset/test1000.csv";
+//    public static final String DATASET_PATH = RESOURCE_PATH + "dataset/test100.csv";
+    public static final String DATASET_PATH = RESOURCE_PATH + "dataset/test1000.csv";
 //    public static final String DATASET_PATH = RESOURCE_PATH + "dataset/wikipedia.csv";
 //    public static final String DATASET_PATH = RESOURCE_PATH + "dataset/reddit.csv";
     /**
@@ -89,7 +89,7 @@ public class Constants {
     /**
      * GraphX 中点边的存储级别
      */
-    public static final StorageLevel MEMORY_ONLY = StorageLevel.MEMORY_ONLY();
+    public static final StorageLevel STORAGE_LEVEL = StorageLevel.MEMORY_AND_DISK();
     /**
      * GraphX 分区策略
      */

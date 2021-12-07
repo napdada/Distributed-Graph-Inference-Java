@@ -28,7 +28,7 @@ import java.util.*;
  */
 @Getter
 @Setter
-public class Dataset implements Serializable{
+public class Dataset implements Serializable {
     /**
      * Log
      */
@@ -45,10 +45,6 @@ public class Dataset implements Serializable{
      * 数据集构的图
      */
     private Graph<Vdata, Edata> graph;
-    /**
-     * 节点一度邻居 HashMap（key: 节点 ID，value：邻居集合的 HashSet）
-     */
-    private HashMap<Long, HashSet<Long>> neighborsMap;
 
     public Dataset(JavaSparkContext sc) {
         this.sc = sc;
@@ -90,13 +86,11 @@ public class Dataset implements Serializable{
      */
     public void creatGraph(RDD<Tuple2<Object, Vdata>> vRDD, RDD<Edge<Edata>> eRDD) {
         if (vRDD != null) {
-            graph = Graph.apply(vRDD, eRDD, new Vdata(), Constants.MEMORY_ONLY, Constants.MEMORY_ONLY,
-                    Constants.VDATA_CLASS_TAG, Constants.EDATA_CLASS_TAG).
-                    partitionBy(Constants.EDGE_PARTITION2D, Constants.PARTITION_NUM);
+            graph = Graph.apply(vRDD, eRDD, new Vdata(), Constants.STORAGE_LEVEL, Constants.STORAGE_LEVEL,
+                    Constants.VDATA_CLASS_TAG, Constants.EDATA_CLASS_TAG);
         } else {
-            graph = Graph.fromEdges(eRDD, new Vdata(), Constants.MEMORY_ONLY, Constants.MEMORY_ONLY,
-                    Constants.VDATA_CLASS_TAG, Constants.EDATA_CLASS_TAG).
-                    partitionBy(Constants.EDGE_PARTITION2D, Constants.PARTITION_NUM);
+            graph = Graph.fromEdges(eRDD, new Vdata(), Constants.STORAGE_LEVEL, Constants.STORAGE_LEVEL,
+                    Constants.VDATA_CLASS_TAG, Constants.EDATA_CLASS_TAG);
         }
     }
 
