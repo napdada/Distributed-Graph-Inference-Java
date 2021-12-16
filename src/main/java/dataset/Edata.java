@@ -2,6 +2,7 @@ package dataset;
 
 import lombok.Getter;
 import lombok.Setter;
+import model.DecoderOutput;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -31,6 +32,18 @@ public class Edata implements Serializable {
      * 边时间戳
      */
     private float timeStamp;
+    /**
+     * MLP Decoder 推理结果
+     */
+    private float[] logits;
+    /**
+     * MLP Decoder 标签
+     */
+    private float[] labels;
+    /**
+     * Decoder accuracy
+     */
+    private int accuracy;
 
     public Edata() {
 
@@ -43,6 +56,25 @@ public class Edata implements Serializable {
         this.timeStamp = timeStamp;
     }
 
+    public Edata(Edata e, DecoderOutput decoderOutput) {
+        this.featDim = e.getFeatDim();
+        this.feat = e.getFeat();
+        this.label = e.getLabel();
+        this.timeStamp = e.getTimeStamp();
+        this.logits = decoderOutput.getLogic();
+        this.labels = decoderOutput.getLabel();
+    }
+
+    public Edata(Edata e, int accuracy) {
+        this.featDim = e.getFeatDim();
+        this.feat = e.getFeat();
+        this.label = e.getLabel();
+        this.timeStamp = e.getTimeStamp();
+        this.logits = e.getLogits();
+        this.labels = e.getLabels();
+        this.accuracy = accuracy;
+    }
+
     @Override
     public String toString() {
         return "Edata{" +
@@ -50,6 +82,8 @@ public class Edata implements Serializable {
                 ", feat=" + Arrays.toString(feat) +
                 ", label=" + label +
                 ", timeStamp=" + timeStamp +
+                ", logits=" + Arrays.toString(logits) +
+                ", labels=" + Arrays.toString(labels) +
                 '}';
     }
 }

@@ -43,7 +43,7 @@ public class Constants {
     /**
      * 数据集名称
      */
-    public static String DATASET_NAME = "test100";
+    public static String DATASET_NAME = "wikipedia";
     /**
      * 数据集存储路径
      */
@@ -80,7 +80,7 @@ public class Constants {
     /**
      * Pytorch 模型任务（LP、EC、NC）
      */
-    public static String TASK_NAME = "LP";
+    public static String TASK_NAME = "EC";
     /**
      * Pytorch Encoder 模型名称
      */
@@ -105,6 +105,18 @@ public class Constants {
      * Encoder 中是否使用 position embedding
      */
     public static final boolean POSITION_EMBEDDING = true;
+
+    /**
+     * Encoder 和 Decoder 模型输入名称映射（Java -> Python）
+     */
+    public static final String N_FEAT = "n_feat";
+    public static final String N_MAIL = "n_mail";
+    public static final String N_LS = "n_last_update";
+    public static final String N_TS = "n_ts";
+    public static final String POS_EMB = "pos_emb";
+    public static final String NEG_EMB = "neg_emb";
+    public static final String POS_LABEL = "pos_label";
+    public static final String NEG_LABEL = "neg_label";
 
     /**
      * GraphX 中图为有向 or 无向
@@ -142,6 +154,10 @@ public class Constants {
      * GraphX 中节点 mail 属性的 class tag
      */
     public static final ClassTag<Mail> MAIL_CLASS_TAG = ClassTag$.MODULE$.apply(Mail.class);
+    /**
+     * Integer tag
+     */
+    public static final ClassTag<Integer> INTEGER_CLASS_TAG = ClassTag$.MODULE$.apply(Integer.class);
     /**
      * Float tag
      */

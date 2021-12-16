@@ -1,0 +1,74 @@
+package absfunc.triplet;
+
+import ai.djl.ndarray.NDArray;
+import ai.djl.ndarray.NDManager;
+import config.Constants;
+import dataset.Edata;
+import dataset.Vdata;
+import lombok.Getter;
+import lombok.Setter;
+import model.Decoder;
+import model.DecoderInput;
+import model.DecoderOutput;
+import org.apache.spark.graphx.EdgeTriplet;
+import scala.runtime.AbstractFunction1;
+
+import java.io.Serializable;
+
+/**
+ * 将 Decoder 模型的结果（logits、labels 更新到边上）
+ *
+ * @author napdada
+ * @version : v 0.1 2021/12/7 20:35
+ */
+@Getter
+@Setter
+public class UpdateTriplet extends AbstractFunction1<EdgeTriplet<Vdata, Edata>, Edata> implements Serializable {
+    /**
+     * 事件发生时间戳
+     */
+    private float timestamp;
+
+    public UpdateTriplet(float timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    /**
+     * 根据三类不同的任务（LP、NC、EC），处理边上的数据为 Decoder 模型的输入
+     * @param e EdgeTriplet<Vdata, Edata>
+     * @return Edata
+     */
+    @Override
+    public Edata apply(EdgeTriplet<Vdata, Edata> e) {
+        if (e.attr().getTimeStamp() == timestamp) {
+            Decoder decoder = Decoder.getInstance();
+            try(NDManager manager = NDManager.newBaseManager()) {
+                NDArray src = manager.create(e.srcAttr().getFeat());
+                NDArray dst = manager.create(e.dstAttr().getFeat());
+                NDArray neg = manager.create(new float[Constants.FEATURE_DIM]);
+                float[][] posEmb = new float[1][], negEmb = {src.concat(neg).toFloatArray()};
+                float[] posLabel = {e.attr().getLabel()}, negLabel = {0f};
+
+                switch (Constants.TASK_NAME) {
+                    case "LP":
+                        posEmb[0] = src.concat(dst).toFloatArray();
+                        break;
+                    case "EC":
+                        NDArray eFeat = manager.create(e.attr().getFeat());
+                        posEmb[0] = src.concat(dst).concat(eFeat).toFloatArray();
+                        break;
+                    case "NC":
+                        posEmb[0] = src.toFloatArray();
+                        break;
+                    default:
+                        System.out.println("参数 TASK_NAME 配置错误！");
+                        return e.attr();
+                }
+                DecoderInput decoderInput = new DecoderInput(posEmb, posLabel, negEmb, negLabel);
+                DecoderOutput decoderOutput = decoder.infer(decoderInput);
+                return new Edata(e.attr(), decoderOutput);
+            }
+        }
+        return e.attr();
+    }
+}

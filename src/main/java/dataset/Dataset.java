@@ -1,6 +1,8 @@
 package dataset;
 
+import absfunc.edge.Acc;
 import absfunc.edge.MergeEdge;
+import absfunc.edge.NegEdge;
 import absfunc.triplet.*;
 import absfunc.vertex.*;
 import config.Constants;
@@ -87,10 +89,12 @@ public class Dataset implements Serializable {
     public void creatGraph(RDD<Tuple2<Object, Vdata>> vRDD, RDD<Edge<Edata>> eRDD) {
         if (vRDD != null) {
             graph = Graph.apply(vRDD, eRDD, new Vdata(), Constants.STORAGE_LEVEL, Constants.STORAGE_LEVEL,
-                    Constants.VDATA_CLASS_TAG, Constants.EDATA_CLASS_TAG);
+                    Constants.VDATA_CLASS_TAG, Constants.EDATA_CLASS_TAG)
+                    .partitionBy(Constants.EDGE_PARTITION2D);
         } else {
             graph = Graph.fromEdges(eRDD, new Vdata(), Constants.STORAGE_LEVEL, Constants.STORAGE_LEVEL,
-                    Constants.VDATA_CLASS_TAG, Constants.EDATA_CLASS_TAG);
+                    Constants.VDATA_CLASS_TAG, Constants.EDATA_CLASS_TAG)
+                    .partitionBy(Constants.EDGE_PARTITION2D);
         }
     }
 
@@ -134,7 +138,7 @@ public class Dataset implements Serializable {
                 Constants.VDATA_CLASS_TAG, Constants.VDATA_CLASS_TAG, tpEquals());
     }
 
-    public void infer(Long src, Long dst) {
+    public void encoder(Long src, Long dst) {
         String event = "event", embedding = "embedding";
         // 1. 合并 src、dst 的 subgraph2D set、subgraph2DFeat map 为 eventSubgraph2D set、eventSubgraph2DFeat map
         VertexRDD<Vdata> vRDD = graph.aggregateMessages(new SendVdata(0, event, src, dst), new MergeVdata(0, event),
@@ -173,6 +177,17 @@ public class Dataset implements Serializable {
                 TripletFields.Src, Constants.VDATA_CLASS_TAG);
         graph = graph.outerJoinVertices(vRDD, new UpdateSubgraph(2, embedding),
                 Constants.VDATA_CLASS_TAG, Constants.VDATA_CLASS_TAG, tpEquals());
+    }
+
+    public void decoder(float timestamp) {
+        graph = graph.mapTriplets(new UpdateTriplet(timestamp), Constants.EDATA_CLASS_TAG);
+    }
+
+    public int evaluate() {
+        EdgeRDD<Integer> edge = graph.edges().mapValues(new Acc(), Constants.INTEGER_CLASS_TAG);
+        RDD<Edge<Integer>> negEdge = edge.filter(new NegEdge());
+        int n = (int) negEdge.count();
+        return n;
     }
 
     /**

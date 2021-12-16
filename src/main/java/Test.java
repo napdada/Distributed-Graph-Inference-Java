@@ -77,11 +77,15 @@ public class Test {
         dataset.printAll();
 
         Long vertexID = 0L;
-        Long vertex2ID = 5L;
+        Long vertex2ID = 1L;
         Long vertex3ID = 14L;
 
-        System.out.println("--------  测试 infer --------");
-        dataset.infer(vertexID, vertex2ID);
+        System.out.println("--------  测试 encoder --------");
+        dataset.encoder(vertexID, vertex2ID);
+        dataset.printAll();
+
+        System.out.println("--------  测试 decoder --------");
+        dataset.decoder(1f);
         dataset.printAll();
 
         System.out.println("--------  测试 updateMailbox --------");

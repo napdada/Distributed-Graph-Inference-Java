@@ -40,10 +40,10 @@ public class EncoderTranslator implements Translator<EncoderInput, EncoderOutput
         NDArray mailArray = manager.create(input.flatMail(), new Shape(input.getMail().length, Constants.MAILBOX_LEN, input.getMailDim()));
         NDArray lastUpdateArray = manager.create(input.getLastUpdate());
         NDArray timestampArray = manager.create(input.getTimestamp());
-        featArray.setName("n_feat");
-        mailArray.setName("n_mail");
-        lastUpdateArray.setName("n_last_update");
-        timestampArray.setName("n_ts");
+        featArray.setName(Constants.N_FEAT);
+        mailArray.setName(Constants.N_MAIL);
+        lastUpdateArray.setName(Constants.N_LS);
+        timestampArray.setName(Constants.N_TS);
         return new NDList(featArray, mailArray, lastUpdateArray, timestampArray);
     }
 

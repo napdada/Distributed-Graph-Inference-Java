@@ -6,6 +6,7 @@ import dataset.Vdata;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.graphx.Edge;
+import org.apache.spark.graphx.Graph;
 import org.apache.spark.rdd.RDD;
 import scala.Tuple2;
 
@@ -28,16 +29,18 @@ public class Main {
 
             // 2. 初始化数据集配置、图配置、模型配置
             long initTime = System.currentTimeMillis(), createGraphTime = 0, mergeTime = 0, updateTsTime = 0, genNeighborTime = 0,
-                    inferTime = 0, updateMailboxTime = 0, tmpTime;
+                    inferTime = 0, updateMailboxTime = 0, decoderTime = 0, actionTime = 0, tmpTime;
             int i = 1;
             File datasetCsv = new File(Constants.DATASET_PATH);
             BufferedReader bufferedReader = new BufferedReader(new FileReader(datasetCsv));
             Dataset dataset = new Dataset(sc);
+            Graph<Vdata, Edata> oldGraph = null;
             RDD<Tuple2<Object, Vdata>> vertexRDD = null;
             RDD<Edge<Edata>> edgeRDD = null;
             String lineData;
             String[] line;
             long srcID, dstID;
+            float timestamp;
             log.error("----------------- 初始化配置耗时：{} ms ----------------", System.currentTimeMillis() - initTime);
 
             // 3. 图推理
@@ -50,6 +53,7 @@ public class Main {
                 line = lineData.split(",");
                 srcID = Long.parseLong(line[Constants.SRC_ID_INDEX]);
                 dstID = Long.parseLong(line[Constants.DST_ID_INDEX]);
+                timestamp = Float.parseFloat(line[Constants.TIMESTAMP_INDEX]);
                 if (edgeRDD == null) {
                     edgeRDD = sc.parallelize(dataset.eventToEdge(line)).rdd();
                 } else {
@@ -58,6 +62,7 @@ public class Main {
                 dataset.creatGraph(vertexRDD, edgeRDD);
                 createGraphTime += System.currentTimeMillis() - tmpTime;
 
+                oldGraph = dataset.getGraph();
                 // mergeEdges
                 tmpTime = System.currentTimeMillis();
                 dataset.mergeEdges();
@@ -75,7 +80,7 @@ public class Main {
 
                 // infer
                 tmpTime = System.currentTimeMillis();
-                dataset.infer(srcID, dstID);
+                dataset.encoder(srcID, dstID);
                 inferTime += System.currentTimeMillis() - tmpTime;
 
                 // updateMailbox
@@ -83,14 +88,25 @@ public class Main {
                 dataset.updateMailbox();
                 updateMailboxTime += System.currentTimeMillis() - tmpTime;
 
+                // decoder
+                tmpTime = System.currentTimeMillis();
+                dataset.decoder(timestamp);
+                decoderTime += System.currentTimeMillis() - tmpTime;
+
+                tmpTime = System.currentTimeMillis();
+                edgeRDD = dataset.getGraph().edges();
                 vertexRDD = dataset.getGraph().vertices();
+                dataset.getGraph().cache();
+                oldGraph.unpersistVertices(false);
+                oldGraph.edges().unpersist(false);
+                actionTime += System.currentTimeMillis() - tmpTime;
+
                 System.out.println(i++);
-                if (i == 1000) break;
             }
             bufferedReader.close();
             long endTime = System.currentTimeMillis();
             log.error("----------------- {} 推理结束 ----------------", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(endTime));
-            System.out.println("推理耗时： "+ (endTime-startTime) +"ms");
+            log.error("----------------- 推理耗时: {} ms ----------------", endTime-startTime);
             float num = i;
             log.error("----------------- createGraphTime: {} ms, avg: {} ms ----------------", createGraphTime, createGraphTime / num);
             log.error("----------------- mergeTime: {} ms, avg: {} ms ----------------", mergeTime, mergeTime / num);
@@ -98,13 +114,15 @@ public class Main {
             log.error("----------------- genNeighborTime: {} ms, avg: {} ms ----------------", genNeighborTime, genNeighborTime / num);
             log.error("----------------- inferTime: {} ms, avg: {} ms ----------------", inferTime, inferTime / num);
             log.error("----------------- updateMailboxTime: {} ms, avg: {} ms ----------------", updateMailboxTime, updateMailboxTime / num);
+            log.error("----------------- decoderTime: {} ms, avg: {} ms ----------------", decoderTime, decoderTime / num);
+            log.error("----------------- actionTime: {} ms, avg: {} ms ----------------", actionTime, actionTime / num);
 
-            // 存储点特征结果，写入 csv
+            // 统计 acc
             tmpTime = System.currentTimeMillis();
-            File result = new File(Constants.RESULT_PATH);
-            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(result));
-            dataset.saveVertexFeat(bufferedWriter);
-            log.error("----------------- writeTIme: {} ms ----------------", System.currentTimeMillis() - tmpTime);
+
+            double accuracy = 1 - dataset.evaluate() / num;
+            log.error("----------------- accuracy: {}  ----------------", accuracy);
+            log.error("----------------- 统计 acc: {} ms ----------------", System.currentTimeMillis() - tmpTime);
         } catch (Exception e) {
             e.printStackTrace();
         }
