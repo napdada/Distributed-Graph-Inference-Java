@@ -49,6 +49,10 @@ public class Constants {
      */
     public static String DATASET_PATH = RESOURCE_PATH + "dataset/" + DATASET_NAME + ".csv";
     /**
+     * checkpoint 路径
+     */
+    public static String CHECKPOINT_PATH = RESOURCE_PATH + "checkpoint/";
+    /**
      * 点边特征维度
      */
     public static final int FEATURE_DIM = 172;

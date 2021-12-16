@@ -56,7 +56,7 @@ public class Test {
 
     public void test() {
         System.out.println("-------- Spark init --------");
-        SparkInit sparkInit = new SparkInit(Constants.SPARK_APP_NAME, Constants.SPARK_MASTER);
+        SparkInit sparkInit = new SparkInit();
         Encoder encoder = Encoder.getInstance();
 
         System.out.println("-------- 开始读取数据并构图 --------");

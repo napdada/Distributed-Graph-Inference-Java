@@ -4,14 +4,18 @@ import dataset.Dataset;
 import dataset.Edata;
 import dataset.Vdata;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.spark.Dependency;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.graphx.Edge;
 import org.apache.spark.graphx.Graph;
+import org.apache.spark.graphx.Pregel;
 import org.apache.spark.rdd.RDD;
 import scala.Tuple2;
+import scala.collection.Seq;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 /**
  * @author napdada
@@ -23,14 +27,14 @@ public class Main {
         try {
             // 1. Spark 初始化
             long sparkInitTime = System.currentTimeMillis();
-            SparkInit sparkInit = new SparkInit(Constants.SPARK_APP_NAME, Constants.SPARK_MASTER);
+            SparkInit sparkInit = new SparkInit();
             JavaSparkContext sc = sparkInit.getSparkContext();
             log.error("----------------- Spark 初始化耗时：{} ms ----------------", System.currentTimeMillis() - sparkInitTime);
 
             // 2. 初始化数据集配置、图配置、模型配置
             long initTime = System.currentTimeMillis(), createGraphTime = 0, mergeTime = 0, updateTsTime = 0, genNeighborTime = 0,
                     inferTime = 0, updateMailboxTime = 0, decoderTime = 0, actionTime = 0, tmpTime;
-            int i = 1;
+            int num = 1;
             File datasetCsv = new File(Constants.DATASET_PATH);
             BufferedReader bufferedReader = new BufferedReader(new FileReader(datasetCsv));
             Dataset dataset = new Dataset(sc);
@@ -41,6 +45,7 @@ public class Main {
             String[] line;
             long srcID, dstID;
             float timestamp;
+            int count = 0;
             log.error("----------------- 初始化配置耗时：{} ms ----------------", System.currentTimeMillis() - initTime);
 
             // 3. 图推理
@@ -96,18 +101,21 @@ public class Main {
                 tmpTime = System.currentTimeMillis();
                 edgeRDD = dataset.getGraph().edges();
                 vertexRDD = dataset.getGraph().vertices();
-                dataset.getGraph().cache();
                 oldGraph.unpersistVertices(false);
                 oldGraph.edges().unpersist(false);
                 actionTime += System.currentTimeMillis() - tmpTime;
 
-                System.out.println(i++);
+                if (num % 10 == 0) {
+                    dataset.getGraph().cache();
+                    dataset.getGraph().checkpoint();
+                    count += dataset.evaluate();
+                }
+                System.out.println(num++);
             }
             bufferedReader.close();
             long endTime = System.currentTimeMillis();
             log.error("----------------- {} 推理结束 ----------------", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(endTime));
             log.error("----------------- 推理耗时: {} ms ----------------", endTime-startTime);
-            float num = i;
             log.error("----------------- createGraphTime: {} ms, avg: {} ms ----------------", createGraphTime, createGraphTime / num);
             log.error("----------------- mergeTime: {} ms, avg: {} ms ----------------", mergeTime, mergeTime / num);
             log.error("----------------- updateTsTime: {} ms, avg: {} ms ----------------", updateTsTime, updateTsTime / num);
@@ -120,8 +128,9 @@ public class Main {
             // 统计 acc
             tmpTime = System.currentTimeMillis();
 
-            double accuracy = 1 - dataset.evaluate() / num;
-            log.error("----------------- accuracy: {}  ----------------", accuracy);
+//            double accuracy = 1 - dataset.evaluate() / num;
+//            log.error("----------------- accuracy: {}  ----------------", accuracy);
+            log.error("----------------- count: {}  ----------------", count);
             log.error("----------------- 统计 acc: {} ms ----------------", System.currentTimeMillis() - tmpTime);
         } catch (Exception e) {
             e.printStackTrace();

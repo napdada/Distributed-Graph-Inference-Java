@@ -31,10 +31,11 @@ public class SparkInit {
      */
     private JavaSparkContext sparkContext;
 
-    public SparkInit(String appName, String master) {
-        this.appName = appName;
-        this.master = master;
-        this.sparkConf = new SparkConf().setAppName(appName).setMaster(master);
-        this.sparkContext = new JavaSparkContext(this.sparkConf);
+    public SparkInit() {
+        appName = Constants.SPARK_APP_NAME;
+        master = Constants.SPARK_MASTER;
+        sparkConf = new SparkConf().setAppName(appName).setMaster(master);
+        sparkContext = new JavaSparkContext(sparkConf);
+        sparkContext.setCheckpointDir(Constants.CHECKPOINT_PATH);
     }
 }
