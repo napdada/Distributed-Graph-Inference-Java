@@ -1,8 +1,6 @@
 package dataset;
 
-import absfunc.edge.Acc;
-import absfunc.edge.MergeEdge;
-import absfunc.edge.NegEdge;
+import absfunc.edge.*;
 import absfunc.triplet.*;
 import absfunc.vertex.*;
 import config.Constants;
@@ -186,8 +184,16 @@ public class Dataset implements Serializable {
     public int evaluate() {
         EdgeRDD<Integer> edge = graph.edges().mapValues(new Acc(), Constants.INTEGER_CLASS_TAG);
         RDD<Edge<Integer>> negEdge = edge.filter(new NegEdge());
+        negEdge.cache();
+        negEdge.checkpoint();
         int n = (int) negEdge.count();
         return n;
+    }
+
+    public int evaluate(float timestamp) {
+        graph = graph.mapEdges(new UpdateAcc(timestamp), Constants.EDATA_CLASS_TAG);
+        List<Edge<Edata>> list = graph.edges().filter(new FilterByTs(timestamp)).toJavaRDD().collect();
+        return list.size();
     }
 
     /**
