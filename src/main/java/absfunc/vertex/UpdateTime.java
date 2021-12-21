@@ -18,7 +18,7 @@ import java.io.Serializable;
  */
 @Getter
 @Setter
-public class UpdateTime extends AbstractFunction3<Object, Vdata, Option<Float>, Vdata> implements Serializable {
+public class UpdateTime extends AbstractFunction3<Object, Vdata, Float, Vdata> implements Serializable {
     /**
      * Log
      */
@@ -33,12 +33,7 @@ public class UpdateTime extends AbstractFunction3<Object, Vdata, Option<Float>, 
      * @return 更新后的点
      */
     @Override
-    public Vdata apply(Object vID, Vdata v, Option<Float> newV) {
-        if (!newV.isEmpty()) {
-            // 【！！！不能直接用 v.setTimestamp() 否则所有点的 timestamp 都被改了，需要 new Vdata()，原因未知！！！】
-            // v2.setTimestamp(v3.get());
-            return new Vdata((Long) vID, v.getFeat(), v.getMailbox(), newV.get(), newV.get());
-        }
-        return v;
+    public Vdata apply(Object vID, Vdata v, Float timestamp) {
+        return new Vdata((Long) vID, v.getFeat(), v.getMailbox(), timestamp, timestamp);
     }
 }

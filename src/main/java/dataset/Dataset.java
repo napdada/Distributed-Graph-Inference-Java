@@ -86,6 +86,7 @@ public class Dataset implements Serializable {
      */
     public void creatGraph(RDD<Tuple2<Object, Vdata>> vRDD, RDD<Edge<Edata>> eRDD) {
         if (vRDD != null) {
+            graph.unpersist(false);
             graph = Graph.apply(vRDD, eRDD, new Vdata(), Constants.STORAGE_LEVEL, Constants.STORAGE_LEVEL,
                     Constants.VDATA_CLASS_TAG, Constants.EDATA_CLASS_TAG)
                     .partitionBy(Constants.EDGE_PARTITION2D);
@@ -200,17 +201,22 @@ public class Dataset implements Serializable {
      * 对全图 graph 中同 src、dst 边进行合并（选最新的边）
      */
     public void mergeEdges() {
-        graph = graph.groupEdges(new MergeEdge());
+        Graph<Vdata, Edata> newGraph = graph.groupEdges(new MergeEdge());
+        graph.unpersist(false);
+        graph = newGraph;
     }
 
     /**
      * 更新全图点的 timestamp 为最新相关事件的 timestamp
+     * TODO: 优化 timestamp 的更新，完全没有必要 sendMsg（会导致已经发过的边重复操作）
+     * TODO: 改成直接利用 src、dst、ts 精准更新 Vdata 即可
      */
     public void updateTimestamp() {
-        VertexRDD<Float> vRDD = graph.aggregateMessages(new SendTimestamp(), new MergeTimestamp(),
-                TripletFields.None, Constants.FLOAT_CLASS_TAG);
-        graph = graph.outerJoinVertices(vRDD, new UpdateTime(),
-                Constants.FLOAT_CLASS_TAG, Constants.VDATA_CLASS_TAG, tpEquals());
+        GraphOps<Vdata, Edata> graphOps = graph.ops();
+        Graph<Vdata, Edata> newGraph = graphOps.pregel((float) 0, 1, EdgeDirection.Both(),
+                new UpdateTime(), new SendTimestamp(), new MergeTimestamp(), Constants.FLOAT_CLASS_TAG);
+        graph.unpersist(false);
+        graph = newGraph;
     }
 
     /**
@@ -369,13 +375,13 @@ public class Dataset implements Serializable {
     public void printAll(Graph<Vdata, Edata> graph) {
         List<Tuple2<Object, Vdata>> vList = graph.vertices().toJavaRDD().collect();
         List<Edge<Edata>> eList = graph.edges().toJavaRDD().collect();
-        logger.info("所有点：");
+        System.out.println("所有点：");
         for (Tuple2<Object, Vdata> v : vList) {
-            logger.info(v.toString());
+            System.out.println(v.toString());
         }
-        logger.info("所有边：");
+        System.out.println("所有边：");
         for (Edge<Edata> e : eList) {
-            logger.info(e.toString());
+            System.out.println(e.toString());
         }
     }
 }

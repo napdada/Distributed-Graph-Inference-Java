@@ -38,7 +38,6 @@ public class Main {
             File datasetCsv = new File(Constants.DATASET_PATH);
             BufferedReader bufferedReader = new BufferedReader(new FileReader(datasetCsv));
             Dataset dataset = new Dataset(sc);
-            Graph<Vdata, Edata> oldGraph = null;
             RDD<Tuple2<Object, Vdata>> vertexRDD = null;
             RDD<Edge<Edata>> edgeRDD = null;
             String lineData;
@@ -64,10 +63,10 @@ public class Main {
                 } else {
                     edgeRDD = edgeRDD.union(sc.parallelize(dataset.eventToEdge(line)).rdd());
                 }
+                // creatGraph
                 dataset.creatGraph(vertexRDD, edgeRDD);
                 createGraphTime += System.currentTimeMillis() - tmpTime;
 
-                oldGraph = dataset.getGraph();
                 // mergeEdges
                 tmpTime = System.currentTimeMillis();
                 dataset.mergeEdges();
@@ -101,8 +100,6 @@ public class Main {
                 tmpTime = System.currentTimeMillis();
                 edgeRDD = dataset.getGraph().edges();
                 vertexRDD = dataset.getGraph().vertices();
-                oldGraph.unpersistVertices(false);
-                oldGraph.edges().unpersist(false);
                 actionTime += System.currentTimeMillis() - tmpTime;
 
                 if (num % 10 == 0) {
