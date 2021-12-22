@@ -20,10 +20,6 @@ import java.util.*;
 public class Vdata implements Serializable {
     private Long id;
     /**
-     * 节点特征维度（eg. wikipedia 172 维）
-     */
-    private int featDim = Constants.FEATURE_DIM;
-    /**
      * 节点特征
      */
     private float[] feat;
@@ -39,6 +35,10 @@ public class Vdata implements Serializable {
      * 新发生事件的最大时间戳
      */
     private float timestamp;
+    /**
+     * 跳数
+     */
+    private int hop;
     /**
      * 当前点的两度邻居点和边
      */
@@ -61,7 +61,7 @@ public class Vdata implements Serializable {
     private HashMap<Long, float[]> embedding;
 
     public Vdata() {
-        this.feat = new float[featDim];
+        this.feat = new float[Constants.FEATURE_DIM];
         this.mailbox = new ArrayList<>();
         this.lastUpdate = 0L;
         this.subgraph2D = new HashSet<>();
@@ -102,7 +102,6 @@ public class Vdata implements Serializable {
 
     public Vdata(Long id, Vdata vdata, HashMap<Long, float[]> embedding) {
         this.id = id;
-        this.featDim = vdata.getFeatDim();
         this.feat = vdata.getFeat();
         this.mailbox = vdata.getMailbox();
         this.lastUpdate = vdata.getLastUpdate();
@@ -116,7 +115,6 @@ public class Vdata implements Serializable {
 
     public Vdata(Long id, Vdata vdata, float[] feat, HashMap<Long, float[]> embedding) {
         this.id = id;
-        this.featDim = vdata.getFeatDim();
         this.feat = feat;
         this.mailbox = vdata.getMailbox();
         this.lastUpdate = vdata.getLastUpdate();
@@ -126,6 +124,19 @@ public class Vdata implements Serializable {
         this.eventSubgraph2D = vdata.getEventSubgraph2D();
         this.eventSubgraph2DFeat = vdata.getEventSubgraph2DFeat();
         this.embedding = embedding;
+    }
+
+    public Vdata(Long id, float lastUpdate, float timestamp) {
+        this.id = id;
+        this.feat = new float[Constants.FEATURE_DIM];
+        this.mailbox = new ArrayList<>();
+        this.lastUpdate = lastUpdate;
+        this.timestamp = timestamp;
+        this.subgraph2D = new HashSet<>();
+        this.subgraph2DFeat = new HashMap<>();
+        this.eventSubgraph2D = new HashSet<>();
+        this.eventSubgraph2DFeat = new HashMap<>();
+        this.embedding = new HashMap<>();
     }
 
     public Vdata(Long id, float[] feat, ArrayList<Mail> mailbox, float lastUpdate, float timestamp) {
@@ -228,7 +239,6 @@ public class Vdata implements Serializable {
     public String toString() {
         return "Vdata{" +
                 "id=" + id +
-                ", featDim=" + featDim +
                 ", feat=" + Arrays.toString(feat) +
                 ", mailbox=" + mailbox +
                 ", lastUpdate=" + lastUpdate +

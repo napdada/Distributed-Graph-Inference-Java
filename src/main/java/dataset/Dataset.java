@@ -170,7 +170,6 @@ public class Dataset implements Serializable {
         graph = graph.outerJoinVertices(vRDD, new UpdateSubgraph(1, embedding),
                 Constants.VDATA_CLASS_TAG, Constants.VDATA_CLASS_TAG, tpEquals());
 
-
         // 6. 将 embedding 发送给 src、dst 的二度点，并更新点 feat
         vRDD = graph.aggregateMessages(new SendVdata(2, embedding, src, dst), new MergeVdata(embedding),
                 TripletFields.Src, Constants.VDATA_CLASS_TAG);
@@ -211,12 +210,11 @@ public class Dataset implements Serializable {
      * TODO: 优化 timestamp 的更新，完全没有必要 sendMsg（会导致已经发过的边重复操作）
      * TODO: 改成直接利用 src、dst、ts 精准更新 Vdata 即可
      */
-    public void updateTimestamp() {
-        GraphOps<Vdata, Edata> graphOps = graph.ops();
-        Graph<Vdata, Edata> newGraph = graphOps.pregel((float) 0, 1, EdgeDirection.Both(),
-                new UpdateTime(), new SendTimestamp(), new MergeTimestamp(), Constants.FLOAT_CLASS_TAG);
-        graph.unpersist(false);
-        graph = newGraph;
+    public void updateTimestamp(Long src, Long dst, float timestamp) {
+        Graph<Vdata, Edata> oldGraph = graph;
+        graph = graph.mapVertices(new UpdateTime(src, dst, timestamp), Constants.VDATA_CLASS_TAG, tpEquals());
+        graph.cache();
+        oldGraph.unpersist(false);
     }
 
     /**

@@ -38,6 +38,8 @@ public class UpdateSubgraph extends AbstractFunction3<Object, Vdata, Option<Vdat
                     Vfeat vfeat;
                     subgraph2D = new HashSet<>();
                     subgraph2DFeat = new HashMap<>();
+                    subgraph2D.add(String.valueOf(vID));
+                    subgraph2DFeat.put((Long) vID, new Vfeat(v));
                     for (Map.Entry<Long, Vfeat> entry : newV.get().getSubgraph2DFeat().entrySet()) {
                         id = entry.getKey();
                         vfeat = entry.getValue();

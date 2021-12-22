@@ -69,7 +69,7 @@ public class Test {
         dataset.printAll();
 
         System.out.println("--------  测试 updateTimestamp --------");
-        dataset.updateTimestamp();
+        dataset.updateTimestamp((long) 0, (long) 1, 1);
         dataset.printAll();
 
         System.out.println("-------- 测试 genNeighbor --------");

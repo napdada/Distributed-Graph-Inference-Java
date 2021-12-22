@@ -74,7 +74,7 @@ public class Main {
 
                 // updateTimestamp
                 tmpTime = System.currentTimeMillis();
-                dataset.updateTimestamp();
+                dataset.updateTimestamp(srcID, dstID, timestamp);
                 updateTsTime += System.currentTimeMillis() - tmpTime;
 
                 // genNeighbor
@@ -102,11 +102,11 @@ public class Main {
                 vertexRDD = dataset.getGraph().vertices();
                 actionTime += System.currentTimeMillis() - tmpTime;
 
-                if (num % 10 == 0) {
-                    dataset.getGraph().cache();
-                    dataset.getGraph().checkpoint();
-                    count += dataset.evaluate();
-                }
+//                if (num % 10 == 0) {
+//                    dataset.getGraph().cache();
+//                    dataset.getGraph().checkpoint();
+//                    count += dataset.evaluate();
+//                }
                 System.out.println(num++);
             }
             bufferedReader.close();
@@ -124,7 +124,7 @@ public class Main {
 
             // 统计 acc
             tmpTime = System.currentTimeMillis();
-
+            dataset.printAll();
 //            double accuracy = 1 - dataset.evaluate() / num;
 //            log.error("----------------- accuracy: {}  ----------------", accuracy);
             log.error("----------------- count: {}  ----------------", count);
