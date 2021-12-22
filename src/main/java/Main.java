@@ -4,18 +4,13 @@ import dataset.Dataset;
 import dataset.Edata;
 import dataset.Vdata;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.spark.Dependency;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.graphx.Edge;
-import org.apache.spark.graphx.Graph;
-import org.apache.spark.graphx.Pregel;
 import org.apache.spark.rdd.RDD;
 import scala.Tuple2;
-import scala.collection.Seq;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.List;
 
 /**
  * @author napdada

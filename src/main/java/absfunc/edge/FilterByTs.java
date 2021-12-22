@@ -6,7 +6,6 @@ import lombok.Setter;
 import org.apache.spark.graphx.Edge;
 import scala.runtime.AbstractFunction1;
 
-import java.io.File;
 import java.io.Serializable;
 
 /**

@@ -19,22 +19,11 @@ public class Vfeat implements Serializable {
     private float lastUpdate;
     private float timestamp;
 
-    public Vfeat() {
-
-    }
-
     public Vfeat(Vdata vdata) {
         this.feat = vdata.getFeat();
         this.mailbox = vdata.getMailbox();
         this.lastUpdate = vdata.getLastUpdate();;
         this.timestamp = vdata.getTimestamp();
-    }
-
-    public Vfeat(float[] feat, ArrayList<Mail> mailbox, float lastUpdate, float timestamp) {
-        this.feat = feat;
-        this.mailbox = mailbox;
-        this.lastUpdate = lastUpdate;
-        this.timestamp = timestamp;
     }
 
     /**

@@ -41,10 +41,6 @@ public class Edata implements Serializable {
      */
     private int accuracy;
 
-    public Edata() {
-
-    }
-
     public Edata(float[] feat, int label, float timeStamp) {
         this.feat = feat;
         this.label = label;

@@ -30,18 +30,22 @@ public class MergeVdata  extends AbstractFunction2<Vdata, Vdata, Vdata> implemen
 
     @Override
     public Vdata apply(Vdata v1, Vdata v2) {
-        if (mergeName.equals("vertex")) {
-            v1.getSubgraph2D().addAll(v2.getSubgraph2D());
-            v1.getSubgraph2DFeat().putAll(v2.getSubgraph2DFeat());
-        } else if (mergeName.equals("event")) {
-            if (turnNum == 0) {
+        switch (mergeName) {
+            case "vertex":
                 v1.getSubgraph2D().addAll(v2.getSubgraph2D());
                 v1.getSubgraph2DFeat().putAll(v2.getSubgraph2DFeat());
-            } else {
-                v1.getEventSubgraph2D().addAll(v2.getEventSubgraph2D());
-            }
-        } else if (mergeName.equals("embedding")) {
-            v1.getEmbedding().putAll(v2.getEmbedding());
+                break;
+            case "event":
+                if (turnNum == 0) {
+                    v1.getSubgraph2D().addAll(v2.getSubgraph2D());
+                    v1.getSubgraph2DFeat().putAll(v2.getSubgraph2DFeat());
+                } else {
+                    v1.getEventSubgraph2D().addAll(v2.getEventSubgraph2D());
+                }
+                break;
+            case "embedding":
+                v1.getEmbedding().putAll(v2.getEmbedding());
+                break;
         }
         return v1;
     }

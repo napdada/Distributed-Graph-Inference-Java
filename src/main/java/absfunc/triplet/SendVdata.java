@@ -39,39 +39,43 @@ public class SendVdata extends AbstractFunction1<EdgeContext<Vdata, Edata, Vdata
 
     @Override
     public BoxedUnit apply(EdgeContext<Vdata, Edata, Vdata> e) {
-        if (sendName.equals("vertex")) {
-            if (turnNum == 1) {
-                HashMap<Long, Vfeat> map = new HashMap<>();
-                map.put(e.srcId(), new Vfeat(e.srcAttr()));
-                e.sendToDst(new Vdata(null, map));
-            } else if (turnNum == 2) {
-                e.sendToDst(new Vdata(e.srcAttr().getSubgraph2D(), e.srcAttr().getSubgraph2DFeat()));
-            }
-        } else if (sendName.equals("event")) {
-            if (turnNum == 0 && e.srcId() == src && e.dstId() == dst) {
-                e.sendToDst(new Vdata(e.srcAttr().getSubgraph2D(), e.srcAttr().getSubgraph2DFeat()));
-                e.sendToSrc(new Vdata(e.dstAttr().getSubgraph2D(), e.dstAttr().getSubgraph2DFeat()));
-            } else if (turnNum == 1 && (e.srcId() == src || e.srcId() == dst)) {
-                e.sendToDst(new Vdata(e.srcAttr().getEventSubgraph2D()));
-            } else if (turnNum == 2) {
-                String path = e.srcId() + "-" + e.dstId();
-                HashSet<String> srcSet = e.srcAttr().getEventSubgraph2D();
-                if (srcSet.contains(path)) {
-                    e.sendToDst(new Vdata(srcSet));
+        switch (sendName) {
+            case "vertex":
+                if (turnNum == 1) {
+                    HashMap<Long, Vfeat> map = new HashMap<>();
+                    map.put(e.srcId(), new Vfeat(e.srcAttr()));
+                    e.sendToDst(new Vdata(null, map));
+                } else if (turnNum == 2) {
+                    e.sendToDst(new Vdata(e.srcAttr().getSubgraph2D(), e.srcAttr().getSubgraph2DFeat()));
                 }
-            }
-        } else if (sendName.equals("embedding")) {
-            if (turnNum == 0 && e.srcId() == src && e.dstId() == dst) {
-                e.sendToDst(new Vdata(e.srcAttr().getEmbedding()));
-            } else if (turnNum == 1 && (e.srcId() == src || e.srcId() == dst)) {
-                e.sendToDst(new Vdata(e.srcAttr().getEmbedding()));
-            } else if (turnNum == 2) {
-                String path = e.srcId() + "-" + e.dstId();
-                HashSet<String> srcSet = e.srcAttr().getEventSubgraph2D();
-                if (srcSet.contains(path)) {
+                break;
+            case "event":
+                if (turnNum == 0 && e.srcId() == src && e.dstId() == dst) {
+                    e.sendToDst(new Vdata(e.srcAttr().getSubgraph2D(), e.srcAttr().getSubgraph2DFeat()));
+                    e.sendToSrc(new Vdata(e.dstAttr().getSubgraph2D(), e.dstAttr().getSubgraph2DFeat()));
+                } else if (turnNum == 1 && (e.srcId() == src || e.srcId() == dst)) {
+                    e.sendToDst(new Vdata(e.srcAttr().getEventSubgraph2D()));
+                } else if (turnNum == 2) {
+                    String path = e.srcId() + "-" + e.dstId();
+                    HashSet<String> srcSet = e.srcAttr().getEventSubgraph2D();
+                    if (srcSet.contains(path)) {
+                        e.sendToDst(new Vdata(srcSet));
+                    }
+                }
+                break;
+            case "embedding":
+                if (turnNum == 0 && e.srcId() == src && e.dstId() == dst) {
                     e.sendToDst(new Vdata(e.srcAttr().getEmbedding()));
+                } else if (turnNum == 1 && (e.srcId() == src || e.srcId() == dst)) {
+                    e.sendToDst(new Vdata(e.srcAttr().getEmbedding()));
+                } else if (turnNum == 2) {
+                    String path = e.srcId() + "-" + e.dstId();
+                    HashSet<String> srcSet = e.srcAttr().getEventSubgraph2D();
+                    if (srcSet.contains(path)) {
+                        e.sendToDst(new Vdata(e.srcAttr().getEmbedding()));
+                    }
                 }
-            }
+                break;
         }
         return BoxedUnit.UNIT;
     }
