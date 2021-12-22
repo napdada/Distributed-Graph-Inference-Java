@@ -161,22 +161,6 @@ public class Vdata implements Serializable {
         }
     }
 
-    public EncoderInput subGraphToInputdata() {
-        int vNum = eventSubgraph2DFeat.size(), i = 0;
-        float[][] feat = new float[vNum][];
-        float[][][] mail = new float[vNum][][];
-        float[] lastUpdate = new float[vNum], timestamp = new float[vNum];
-
-        for (Map.Entry<Long, Vfeat> entry : eventSubgraph2DFeat.entrySet()) {
-            feat[i] = entry.getValue().getFeat();
-            mail[i] = entry.getValue().mailboxToArray();
-            lastUpdate[i] = entry.getValue().getLastUpdate();
-            timestamp[i] = entry.getValue().getTimestamp();
-            i++;
-        }
-        return new EncoderInput(feat, mail, lastUpdate, timestamp);
-    }
-
     /**
      * 将 feat[] 转为 String
      * @return String
@@ -208,32 +192,6 @@ public class Vdata implements Serializable {
         return sb.append(']').toString();
     }
 
-    /**
-     * 将 mailbox 转为 JSONArray
-     * @return JSONArray
-     */
-    public JSONArray mailboxToJSON() {
-        JSONArray mailJSONArray = new JSONArray();
-        alignMailbox();
-        for (Mail mail : mailbox) {
-            mailJSONArray.add(mail.getFeat());
-        }
-        return mailJSONArray;
-    }
-
-    /**
-     * 将 mailbox 转为 Array
-     * @return float[][]
-     */
-    public float[][] mailboxToArray() {
-        int i = 0;
-        float[][] mails = new float[Constants.MAILBOX_LEN][];
-        alignMailbox();
-        for (Mail mail : mailbox) {
-            mails[i++] = mail.getFeat();
-        }
-        return mails;
-    }
 
     @Override
     public String toString() {

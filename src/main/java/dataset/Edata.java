@@ -17,10 +17,6 @@ import java.util.Arrays;
 @Setter
 public class Edata implements Serializable {
     /**
-     * 边特征维度
-     */
-    private int featDim;
-    /**
      * 边特征
      */
     private float[] feat;
@@ -49,15 +45,13 @@ public class Edata implements Serializable {
 
     }
 
-    public Edata(int featDim, float[] feat, int label, float timeStamp) {
-        this.featDim = featDim;
+    public Edata(float[] feat, int label, float timeStamp) {
         this.feat = feat;
         this.label = label;
         this.timeStamp = timeStamp;
     }
 
     public Edata(Edata e, DecoderOutput decoderOutput) {
-        this.featDim = e.getFeatDim();
         this.feat = e.getFeat();
         this.label = e.getLabel();
         this.timeStamp = e.getTimeStamp();
@@ -66,7 +60,6 @@ public class Edata implements Serializable {
     }
 
     public Edata(Edata e, int accuracy) {
-        this.featDim = e.getFeatDim();
         this.feat = e.getFeat();
         this.label = e.getLabel();
         this.timeStamp = e.getTimeStamp();
@@ -78,8 +71,7 @@ public class Edata implements Serializable {
     @Override
     public String toString() {
         return "Edata{" +
-                "featDim=" + featDim +
-                ", feat=" + Arrays.toString(feat) +
+                "feat=" + Arrays.toString(feat) +
                 ", label=" + label +
                 ", timeStamp=" + timeStamp +
                 ", logits=" + Arrays.toString(logits) +

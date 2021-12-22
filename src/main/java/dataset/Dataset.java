@@ -69,7 +69,7 @@ public class Dataset implements Serializable {
         for (int i = 0; i < Constants.FEATURE_DIM; i++) {
             feat[i] = Float.parseFloat(event[i +Constants.FEATURE_INDEX]);
         }
-        Edata edata = new Edata(Constants.FEATURE_DIM, feat, label, timestamp);
+        Edata edata = new Edata(feat, label, timestamp);
         ArrayList<Edge<Edata>> edgeList = new ArrayList<>();
         edgeList.add(new Edge<>(srcID, dstID, edata));
         // 无向图需要双向边
@@ -207,8 +207,6 @@ public class Dataset implements Serializable {
 
     /**
      * 更新全图点的 timestamp 为最新相关事件的 timestamp
-     * TODO: 优化 timestamp 的更新，完全没有必要 sendMsg（会导致已经发过的边重复操作）
-     * TODO: 改成直接利用 src、dst、ts 精准更新 Vdata 即可
      */
     public void updateTimestamp(Long src, Long dst, float timestamp) {
         Graph<Vdata, Edata> oldGraph = graph;
