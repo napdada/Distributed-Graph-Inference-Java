@@ -139,14 +139,15 @@ public class Vdata implements Serializable {
         this.embedding = new HashMap<>();
     }
 
-    public Vdata(Long id, float[] feat, ArrayList<Mail> mailbox, float lastUpdate, float timestamp) {
+    public Vdata(Long id, float[] feat, ArrayList<Mail> mailbox, HashSet<String> subgraph2D, HashMap<Long, Vfeat> subgraph2DFeat,
+                 float lastUpdate, float timestamp) {
         this.id = id;
         this.feat = feat;
         this.mailbox = mailbox;
         this.lastUpdate = lastUpdate;
         this.timestamp = timestamp;
-        this.subgraph2D = new HashSet<>();
-        this.subgraph2DFeat = new HashMap<>();
+        this.subgraph2D = subgraph2D;
+        this.subgraph2DFeat = subgraph2DFeat;
         this.eventSubgraph2D = new HashSet<>();
         this.eventSubgraph2DFeat = new HashMap<>();
         this.embedding = new HashMap<>();

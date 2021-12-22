@@ -51,7 +51,8 @@ public class UpdateTime extends AbstractFunction2<Object, Vdata, Vdata> implemen
     public Vdata apply(Object vID, Vdata v) {
         if (vID.equals(src) || vID.equals(dst)) {
             if (v.getMailbox().size() != 0) {
-                return new Vdata((Long) vID, v.getFeat(), v.getMailbox(), timestamp, timestamp);
+                return new Vdata((Long) vID, v.getFeat(), v.getMailbox(), v.getSubgraph2D(), v.getSubgraph2DFeat(),
+                        timestamp, timestamp);
             } else {
                 return new Vdata((Long) vID, timestamp, timestamp);
             }
