@@ -120,6 +120,7 @@ public class Main {
             // 统计 acc
             tmpTime = System.currentTimeMillis();
             dataset.printAll();
+            dataset.saveVertexFeat();
 //            double accuracy = 1 - dataset.evaluate() / num;
 //            log.error("----------------- accuracy: {}  ----------------", accuracy);
             log.error("----------------- count: {}  ----------------", count);

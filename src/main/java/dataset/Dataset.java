@@ -236,9 +236,10 @@ public class Dataset implements Serializable {
 
     /**
      * 将 Pytorch 模型推理后更新的点特征进行存储
-     * @param writerRes BufferedWriter
      */
-    public void saveVertexFeat(BufferedWriter writerRes) {
+    public void saveVertexFeat() throws IOException {
+        File resCsv = new File(Constants.RESULT_PATH);
+        BufferedWriter writerRes = new BufferedWriter(new FileWriter(resCsv));
         List<Tuple2<Object, Vdata>> vertexList = graph.vertices().toJavaRDD().collect();
         try {
             writerRes.write(Constants.RESULT_TITLE);
