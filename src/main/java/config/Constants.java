@@ -3,6 +3,7 @@ package config;
 import dataset.Edata;
 import dataset.Mail;
 import dataset.Vdata;
+import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.graphx.PartitionStrategy;
 import org.apache.spark.storage.StorageLevel;
 import scala.reflect.ClassTag;
@@ -35,6 +36,10 @@ public class Constants {
      * Spark 集群 URL（eg. "local"、"spark:master7077"）
      */
     public static final String SPARK_MASTER = "local";
+    /**
+     * Java Spark Context
+     */
+    public static final JavaSparkContext SC = new SparkInit().getSparkContext();
 
     /**
      * 静态资源存储路径

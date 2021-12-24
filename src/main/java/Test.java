@@ -56,11 +56,10 @@ public class Test {
 
     public void test() {
         System.out.println("-------- Spark init --------");
-        SparkInit sparkInit = new SparkInit();
         Encoder encoder = Encoder.getInstance();
 
         System.out.println("-------- 开始读取数据并构图 --------");
-        Dataset dataset = new Dataset(Constants.DATASET_PATH, sparkInit.getSparkContext());
+        Dataset dataset = new Dataset(Constants.DATASET_PATH);
         dataset.readData();
         dataset.printAll();
 

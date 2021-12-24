@@ -22,8 +22,7 @@ public class Main {
         try {
             // 1. Spark 初始化
             long sparkInitTime = System.currentTimeMillis();
-            SparkInit sparkInit = new SparkInit();
-            JavaSparkContext sc = sparkInit.getSparkContext();
+            JavaSparkContext sc = Constants.SC;
             log.error("----------------- Spark 初始化耗时：{} ms ----------------", System.currentTimeMillis() - sparkInitTime);
 
             // 2. 初始化数据集配置、图配置、模型配置
@@ -32,7 +31,7 @@ public class Main {
             int num = 1;
             File datasetCsv = new File(Constants.DATASET_PATH);
             BufferedReader bufferedReader = new BufferedReader(new FileReader(datasetCsv));
-            Dataset dataset = new Dataset(sc);
+            Dataset dataset = new Dataset();
             RDD<Tuple2<Object, Vdata>> vertexRDD = null;
             RDD<Edge<Edata>> edgeRDD = null;
             String lineData;
@@ -74,7 +73,7 @@ public class Main {
 
                 // genNeighbor
                 tmpTime = System.currentTimeMillis();
-                dataset.genNeighbor();
+//                dataset.genNeighbor();
                 genNeighborTime += System.currentTimeMillis() - tmpTime;
 
                 // infer
@@ -97,11 +96,9 @@ public class Main {
                 vertexRDD = dataset.getGraph().vertices();
                 actionTime += System.currentTimeMillis() - tmpTime;
 
-//                if (num % 10 == 0) {
-//                    dataset.getGraph().cache();
-//                    dataset.getGraph().checkpoint();
-//                    count += dataset.evaluate();
-//                }
+                if (num % 10 == 0) {
+                    count += dataset.evaluate();
+                }
                 System.out.println(num++);
             }
             bufferedReader.close();
@@ -119,8 +116,6 @@ public class Main {
 
             // 统计 acc
             tmpTime = System.currentTimeMillis();
-            dataset.printAll();
-            dataset.saveVertexFeat();
 //            double accuracy = 1 - dataset.evaluate() / num;
 //            log.error("----------------- accuracy: {}  ----------------", accuracy);
             log.error("----------------- count: {}  ----------------", count);

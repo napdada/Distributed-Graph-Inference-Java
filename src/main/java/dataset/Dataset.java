@@ -38,21 +38,16 @@ public class Dataset implements Serializable {
      */
     private String path;
     /**
-     * JavaSparkContext
-     */
-    private JavaSparkContext sc;
-    /**
      * 数据集构的图
      */
     private Graph<Vdata, Edata> graph;
 
-    public Dataset(JavaSparkContext sc) {
-        this.sc = sc;
+    public Dataset() {
+
     }
 
-    public Dataset(String path, JavaSparkContext sc) {
+    public Dataset(String path) {
         this.path = path;
-        this.sc = sc;
     }
 
     /**
@@ -96,6 +91,38 @@ public class Dataset implements Serializable {
                     .partitionBy(Constants.EDGE_PARTITION2D);
         }
     }
+    public Graph<Vdata, Edata> demoGraph() {
+        Edata edata = new Edata();
+        ArrayList<Tuple2<Object, Vdata>> v = new ArrayList<>();
+        v.add(new Tuple2<>(0L, new Vdata()));
+        v.add(new Tuple2<>(1L, new Vdata()));
+        v.add(new Tuple2<>(2L, new Vdata()));
+        v.add(new Tuple2<>(3L, new Vdata()));
+        v.add(new Tuple2<>(4L, new Vdata()));
+        v.add(new Tuple2<>(5L, new Vdata()));
+        v.add(new Tuple2<>(6L, new Vdata()));
+        v.add(new Tuple2<>(7L, new Vdata()));
+        v.add(new Tuple2<>(8L, new Vdata()));
+        v.add(new Tuple2<>(9L, new Vdata()));
+        v.add(new Tuple2<>(10L, new Vdata()));
+        v.add(new Tuple2<>(11L, new Vdata()));
+        ArrayList<Edge<Edata>> l = new ArrayList<>();
+        l.add(new Edge<>(0, 1, edata));l.add(new Edge<>(1, 0, edata));
+        l.add(new Edge<>(0, 2, edata));l.add(new Edge<>(2, 0, edata));
+        l.add(new Edge<>(0, 3, edata));l.add(new Edge<>(3, 0, edata));
+        l.add(new Edge<>(0, 5, edata));l.add(new Edge<>(5, 0, edata));
+        l.add(new Edge<>(7, 5, edata));l.add(new Edge<>(5, 7, edata));
+        l.add(new Edge<>(4, 1, edata));l.add(new Edge<>(1, 4, edata));
+        l.add(new Edge<>(6, 1, edata));l.add(new Edge<>(1, 6, edata));
+        l.add(new Edge<>(8, 1, edata));l.add(new Edge<>(1, 8, edata));
+        l.add(new Edge<>(8, 9, edata));l.add(new Edge<>(9, 8, edata));
+        l.add(new Edge<>(8, 10, edata));l.add(new Edge<>(10, 8, edata));
+        l.add(new Edge<>(9, 10, edata));l.add(new Edge<>(10, 9, edata));
+        l.add(new Edge<>(11, 9, edata));l.add(new Edge<>(9, 11, edata));
+        return Graph.apply(Constants.SC.parallelize(v).rdd(), Constants.SC.parallelize(l).rdd(), new Vdata(), Constants.STORAGE_LEVEL, Constants.STORAGE_LEVEL,
+                Constants.VDATA_CLASS_TAG, Constants.EDATA_CLASS_TAG)
+                .partitionBy(Constants.EDGE_PARTITION2D);
+    }
 
     /**
      * 从 CSV 中读取数据并构图
@@ -115,7 +142,7 @@ public class Dataset implements Serializable {
             bufferedReader.close();
 
             // 2. 构图
-            creatGraph(null, sc.parallelize(edgeList).rdd());
+            creatGraph(null, Constants.SC.parallelize(edgeList).rdd());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -187,6 +214,8 @@ public class Dataset implements Serializable {
         negEdge.cache();
         negEdge.checkpoint();
         int n = (int) negEdge.count();
+        edge.unpersist(false);
+        negEdge.unpersist(false);
         return n;
     }
 
