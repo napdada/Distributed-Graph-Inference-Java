@@ -72,7 +72,7 @@ public class Test {
         dataset.printAll();
 
         System.out.println("-------- 测试 genNeighbor --------");
-        dataset.genNeighbor();
+        dataset.event2DSubgraph((long) 0, (long) 1);
         dataset.printAll();
 
         Long vertexID = 0L;

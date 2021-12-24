@@ -1,10 +1,8 @@
 package dataset;
 
-import com.alibaba.fastjson.JSONArray;
 import config.Constants;
 import lombok.Getter;
 import lombok.Setter;
-import model.EncoderInput;
 
 import java.io.Serializable;
 import java.util.*;
@@ -193,7 +191,6 @@ public class Vdata implements Serializable {
         return sb.append(']').toString();
     }
 
-
     @Override
     public String toString() {
         return "Vdata{" +
@@ -202,6 +199,7 @@ public class Vdata implements Serializable {
                 ", mailbox=" + mailbox +
                 ", lastUpdate=" + lastUpdate +
                 ", timestamp=" + timestamp +
+                ", hop=" + hop +
                 ", subgraph2D=" + subgraph2D +
                 ", subgraph2DFeat=" + subgraph2DFeat +
                 ", eventSubgraph2D=" + eventSubgraph2D +

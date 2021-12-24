@@ -148,20 +148,21 @@ public class Dataset implements Serializable {
         }
     }
 
-    public void genNeighbor() {
-        String vertex = "vertex";
+    public void event2DSubgraph(Long src, Long dst) {
+        // 利用 pregel 获取新事件的 2DSubgraph（hop = 2、hop = 1、hop = 0）
+        graph = demoGraph();
+        Graph<Vdata, Edata> oldGraph = graph;
+        GraphOps<Vdata, Edata> graphOps = graph.ops();
+        graph = graphOps.pregel(2, 2, EdgeDirection.Out(),
+                new UpdateHop(), new SendHop(src, dst), new MergeHop(), Constants.INTEGER_CLASS_TAG);
+        oldGraph.unpersist(false);
 
-        // 1. 第一轮发消息更新一度 subgraph2D set、subgraph2DFeat map
-        VertexRDD<Vdata> vRDD = graph.aggregateMessages(new SendVdata(1, vertex), new MergeVdata(vertex),
-                TripletFields.Src, Constants.VDATA_CLASS_TAG);
-        graph = graph.outerJoinVertices(vRDD, new UpdateSubgraph(1, vertex),
-                Constants.VDATA_CLASS_TAG, Constants.VDATA_CLASS_TAG, tpEquals());
+        List<Tuple2<Object, Vdata>> list = graph.vertices().toJavaRDD().collect();
 
-        // 2. 第二轮发消息更新二度 subgraph2D set、subgraph2DFeat map
-        vRDD = graph.aggregateMessages(new SendVdata(2, vertex), new MergeVdata(vertex),
-                TripletFields.Src, Constants.VDATA_CLASS_TAG);
-        graph = graph.outerJoinVertices(vRDD, new UpdateSubgraph(2, vertex),
-                Constants.VDATA_CLASS_TAG, Constants.VDATA_CLASS_TAG, tpEquals());
+        // 将 2DSubgraph 中点的 Vfeat 发送回 src、dst
+        // 1. 第一轮 hop = 0 发给 hop = 1，hop = 1 汇总
+        // 2. 第二轮 hop = 1 发给 hop = 2，hop = 2 汇总
+        // 3. 合并 src、dst 汇总结果
     }
 
     public void encoder(Long src, Long dst) {

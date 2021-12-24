@@ -73,7 +73,7 @@ public class Main {
 
                 // genNeighbor
                 tmpTime = System.currentTimeMillis();
-//                dataset.genNeighbor();
+//                dataset.event2DSubgraph();
                 genNeighborTime += System.currentTimeMillis() - tmpTime;
 
                 // infer
