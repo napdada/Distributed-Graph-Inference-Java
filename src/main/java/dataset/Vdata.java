@@ -98,12 +98,26 @@ public class Vdata implements Serializable {
         this.embedding = embedding;
     }
 
+    public Vdata(Long id, Vdata vdata) {
+        this.id = id;
+        this.feat = vdata.getFeat();
+        this.mailbox = vdata.getMailbox();
+        this.lastUpdate = vdata.getLastUpdate();
+        this.timestamp = vdata.getTimestamp();
+        this.hop = vdata.getHop();
+        this.subgraph2D = vdata.getSubgraph2D();
+        this.subgraph2DFeat = vdata.getSubgraph2DFeat();
+        this.eventSubgraph2D = vdata.getEventSubgraph2D();
+        this.eventSubgraph2DFeat = vdata.getEventSubgraph2DFeat();
+        this.embedding = vdata.getEmbedding();
+    }
     public Vdata(Long id, Vdata vdata, HashMap<Long, float[]> embedding) {
         this.id = id;
         this.feat = vdata.getFeat();
         this.mailbox = vdata.getMailbox();
         this.lastUpdate = vdata.getLastUpdate();
         this.timestamp = vdata.getTimestamp();
+        this.hop = vdata.getHop();
         this.subgraph2D = vdata.getSubgraph2D();
         this.subgraph2DFeat = vdata.getSubgraph2DFeat();
         this.eventSubgraph2D = vdata.getEventSubgraph2D();

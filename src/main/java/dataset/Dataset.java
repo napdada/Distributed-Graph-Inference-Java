@@ -166,7 +166,7 @@ public class Dataset implements Serializable {
         Graph<Vdata, Edata> oldGraph2 = graph;
         GraphOps<Vdata, Edata> graphOps2 = graph.ops();
         graph = graphOps2.pregel(new HashMap<>(), 3, EdgeDirection.Out(),
-                new Update2DSubgraph(), new SendVfeat(), new MergeVfeat(), Constants.HASH_MAP_CLASS_TAG);
+                new Update2DSubgraph(), new SendVfeat(), new MergeVfeat(), Constants.SUBGRAPH_MAP_CLASS_TAG);
         oldGraph2.unpersist(false);
 
         List<Tuple2<Object, Vdata>> list2 = graph.vertices().toJavaRDD().collect();
@@ -174,43 +174,19 @@ public class Dataset implements Serializable {
     }
 
     public void encoder(Long src, Long dst) {
-        String event = "event", embedding = "embedding";
-        // 1. 合并 src、dst 的 subgraph2D set、subgraph2DFeat map 为 eventSubgraph2D set、eventSubgraph2DFeat map
-        VertexRDD<Vdata> vRDD = graph.aggregateMessages(new SendVdata(0, event, src, dst), new MergeVdata(0, event),
-                TripletFields.All, Constants.VDATA_CLASS_TAG);
-        graph = graph.outerJoinVertices(vRDD, new UpdateSubgraph(0, event),
-                Constants.VDATA_CLASS_TAG, Constants.VDATA_CLASS_TAG, tpEquals());
-
-        // 2. 将 src、dst 的 eventSubgraph2D set 发送给一度点
-        vRDD = graph.aggregateMessages(new SendVdata(1, event, src, dst), new MergeVdata(1, event),
-                TripletFields.Src, Constants.VDATA_CLASS_TAG);
-        graph = graph.outerJoinVertices(vRDD, new UpdateSubgraph(1, event),
-                Constants.VDATA_CLASS_TAG, Constants.VDATA_CLASS_TAG, tpEquals());
-
-        // 3. 将 src、dst 的 eventSubgraph2D set 发送给二度点
-        vRDD = graph.aggregateMessages(new SendVdata(2, event, src, dst), new MergeVdata(2, event),
-                TripletFields.Src, Constants.VDATA_CLASS_TAG);
-        graph = graph.outerJoinVertices(vRDD, new UpdateSubgraph(2, event),
-                Constants.VDATA_CLASS_TAG, Constants.VDATA_CLASS_TAG, tpEquals());
-
-        // 4. 对 src、dst 进行推理，更新其 embedding map
+        Graph<Vdata, Edata> oldGraph1 = graph;
         graph = graph.mapVertices(new UpdateFeat(src), Constants.VDATA_CLASS_TAG, tpEquals());
-        vRDD = graph.aggregateMessages(new SendVdata(0, embedding, src, dst), new MergeVdata(embedding),
-                TripletFields.Src, Constants.VDATA_CLASS_TAG);
-        graph = graph.outerJoinVertices(vRDD, new UpdateSubgraph(0, embedding),
-                Constants.VDATA_CLASS_TAG, Constants.VDATA_CLASS_TAG, tpEquals());
+        oldGraph1.unpersist(false);
 
-        // 5. 将 embedding 发送给 src、dst 的一度点，并更新点 feat
-        vRDD = graph.aggregateMessages(new SendVdata(1, embedding, src, dst), new MergeVdata(embedding),
-                TripletFields.Src, Constants.VDATA_CLASS_TAG);
-        graph = graph.outerJoinVertices(vRDD, new UpdateSubgraph(1, embedding),
-                Constants.VDATA_CLASS_TAG, Constants.VDATA_CLASS_TAG, tpEquals());
+        List<Tuple2<Object, Vdata>> list = graph.vertices().toJavaRDD().collect();
 
-        // 6. 将 embedding 发送给 src、dst 的二度点，并更新点 feat
-        vRDD = graph.aggregateMessages(new SendVdata(2, embedding, src, dst), new MergeVdata(embedding),
-                TripletFields.Src, Constants.VDATA_CLASS_TAG);
-        graph = graph.outerJoinVertices(vRDD, new UpdateSubgraph(2, embedding),
-                Constants.VDATA_CLASS_TAG, Constants.VDATA_CLASS_TAG, tpEquals());
+        Graph<Vdata, Edata> oldGraph2 = graph;
+        GraphOps<Vdata, Edata> graphOps = graph.ops();
+        graph = graphOps.pregel(new HashMap<>(), 3, EdgeDirection.Out(),
+                new UpdateEmb(), new SendEmb(src, dst), new MergeEmb(), Constants.EMBEDDING_MAP_CLASS_TAG);
+        oldGraph2.unpersist(false);
+
+        List<Tuple2<Object, Vdata>> list2 = graph.vertices().toJavaRDD().collect();
     }
 
     public void decoder(float timestamp) {

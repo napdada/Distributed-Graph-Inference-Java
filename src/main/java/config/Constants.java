@@ -174,6 +174,12 @@ public class Constants {
      * Float tag
      */
     public static final ClassTag<Float> FLOAT_CLASS_TAG = ClassTag$.MODULE$.apply(Float.class);
-
-    public static final ClassTag<HashMap<Long, Vfeat>> HASH_MAP_CLASS_TAG = ClassTag$.MODULE$.apply(HashMap.class);
+    /**
+     * HashMap<Long, Vfeat> 二度子图 map tag
+     */
+    public static final ClassTag<HashMap<Long, Vfeat>> SUBGRAPH_MAP_CLASS_TAG = ClassTag$.MODULE$.apply(HashMap.class);
+    /**
+     * HashMap<Long, float[]> embedding map tag
+     */
+    public static final ClassTag<HashMap<Long, float[]>> EMBEDDING_MAP_CLASS_TAG = ClassTag$.MODULE$.apply(HashMap.class);
 }
