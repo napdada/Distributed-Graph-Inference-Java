@@ -3,11 +3,14 @@ package config;
 import dataset.Edata;
 import dataset.Mail;
 import dataset.Vdata;
+import dataset.Vfeat;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.graphx.PartitionStrategy;
 import org.apache.spark.storage.StorageLevel;
 import scala.reflect.ClassTag;
 import scala.reflect.ClassTag$;
+
+import java.util.HashMap;
 
 /**
  * 配置常量集合
@@ -171,4 +174,6 @@ public class Constants {
      * Float tag
      */
     public static final ClassTag<Float> FLOAT_CLASS_TAG = ClassTag$.MODULE$.apply(Float.class);
+
+    public static final ClassTag<HashMap<Long, Vfeat>> HASH_MAP_CLASS_TAG = ClassTag$.MODULE$.apply(HashMap.class);
 }

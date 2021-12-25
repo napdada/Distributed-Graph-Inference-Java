@@ -163,6 +163,14 @@ public class Dataset implements Serializable {
         // 1. 第一轮 hop = 0 发给 hop = 1，hop = 1 汇总
         // 2. 第二轮 hop = 1 发给 hop = 2，hop = 2 汇总
         // 3. 合并 src、dst 汇总结果
+        Graph<Vdata, Edata> oldGraph2 = graph;
+        GraphOps<Vdata, Edata> graphOps2 = graph.ops();
+        graph = graphOps2.pregel(new HashMap<>(), 3, EdgeDirection.Out(),
+                new Update2DSubgraph(), new SendVfeat(), new MergeVfeat(), Constants.HASH_MAP_CLASS_TAG);
+        oldGraph2.unpersist(false);
+
+        List<Tuple2<Object, Vdata>> list2 = graph.vertices().toJavaRDD().collect();
+
     }
 
     public void encoder(Long src, Long dst) {
