@@ -19,6 +19,6 @@ public class Update2DSubgraph extends AbstractFunction3<Object, Vdata, HashMap<L
         map.putAll(v.getEventSubgraph2DFeat());
         map.putAll(eventSubgraph);
         map.put((Long) vID, new Vfeat(v));
-        return new Vdata((Long) vID, v, map, true);
+        return new Vdata((Long) vID, v, map);
     }
 }

@@ -21,8 +21,7 @@ public class UpdateMailbox extends AbstractFunction3<Object, Vdata, Option<Mail>
             // 注意 new ArrayList<>，否则因为点初始化的问题，所有点的 mailbox 都指向一个引用
             ArrayList<Mail> mailbox = new ArrayList<>(v.getMailbox());
             updateMailbox(mailbox, newV.get());
-            return new Vdata((Long) vID, v.getFeat(), mailbox, v.getSubgraph2D(), v.getSubgraph2DFeat(),
-                    v.getLastUpdate(), v.getTimestamp());
+            return new Vdata((Long) vID, v.getFeat(), mailbox, v.getLastUpdate(), v.getTimestamp());
         }
         return v;
     }

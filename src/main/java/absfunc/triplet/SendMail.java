@@ -12,6 +12,7 @@ import scala.runtime.AbstractFunction1;
 import scala.runtime.BoxedUnit;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.HashSet;
 
 /**
@@ -32,10 +33,9 @@ public class SendMail extends AbstractFunction1<EdgeContext<Vdata, Edata, Mail>,
     @Override
     public BoxedUnit apply(EdgeContext<Vdata, Edata, Mail> e) {
         try(NDManager manager = NDManager.newBaseManager()) {
-            HashSet<String> srcSet = e.srcAttr().getEventSubgraph2D();
-            HashSet<String> dstSet = e.dstAttr().getEventSubgraph2D();
-            String path = e.srcId() + "-" + e.dstId();
-            if (srcSet.contains(path) && dstSet.contains(path)) {
+            HashMap<Long, float[]> srcMap = e.srcAttr().getEmbedding();
+            HashMap<Long, float[]> dstMap = e.dstAttr().getEmbedding();
+            if (srcMap.size() != 0 && dstMap.size() != 0) {
                 NDArray src = manager.create(e.srcAttr().getFeat());
                 NDArray dst = manager.create(e.dstAttr().getFeat());
                 NDArray edge = manager.create(e.attr().getFeat());
