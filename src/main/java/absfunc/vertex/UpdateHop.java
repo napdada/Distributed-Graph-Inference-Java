@@ -21,7 +21,7 @@ public class UpdateHop extends AbstractFunction3<Object, Vdata, Integer, Vdata> 
      */
     @Override
     public Vdata apply(Object vID, Vdata v, Integer hop) {
-        Vdata newV = new Vdata();
+        Vdata newV = new Vdata((Long) vID, v);
         // 新 hop 比旧 hop 大才更新（不包含 init hop = 2 的情况）
         if (v.getHop() == 2 || v.getHop() < hop) {
             newV.setHop(hop);
