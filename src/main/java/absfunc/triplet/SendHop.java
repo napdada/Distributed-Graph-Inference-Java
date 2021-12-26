@@ -14,14 +14,21 @@ import java.io.Serializable;
 import java.util.Collections;
 
 /**
+ * GraphOps.pregel 形参中 sendMsg 的实现
+ * 每轮迭代将 src 的 hop - 1 发给 dst
  * @author napdada
  * @version : v 0.1 2021/12/23 10:57
  */
 @Getter
 @Setter
 public class SendHop extends AbstractFunction1<EdgeTriplet<Vdata, Edata>, Iterator<Tuple2<Object, Integer>>> implements Serializable {
-
+    /**
+     * src ID
+     */
     private Long src;
+    /**
+     * dst ID
+     */
     private Long dst;
 
     public SendHop(Long src, Long dst) {
@@ -41,7 +48,6 @@ public class SendHop extends AbstractFunction1<EdgeTriplet<Vdata, Edata>, Iterat
      */
     @Override
     public Iterator<Tuple2<Object, Integer>> apply(EdgeTriplet<Vdata, Edata> e) {
-        // 1. src、dst 之间不发消息
         if (e.srcId() == src && e.dstId() == dst || e.dstId() == src && e.srcId() == dst) {
             return JavaConverters.asScalaIterator(Collections.emptyIterator());
         } else if (e.srcId() == src || e.srcId() == dst) {

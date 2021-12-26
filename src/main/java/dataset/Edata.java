@@ -1,5 +1,6 @@
 package dataset;
 
+import config.Constants;
 import lombok.Getter;
 import lombok.Setter;
 import model.DecoderOutput;
@@ -42,7 +43,9 @@ public class Edata implements Serializable {
     private int accuracy;
 
     public Edata() {
-
+        this.feat = new float[Constants.FEATURE_DIM];
+        this.label = 0;
+        this.timeStamp = 0;
     }
 
     public Edata(float[] feat, int label, float timeStamp) {

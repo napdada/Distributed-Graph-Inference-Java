@@ -8,12 +8,11 @@ import java.util.HashMap;
 
 /**
  * GraphOps.pregel 形参中 vprog 的实现
- * 将 pregel 每轮迭代 merge msg 更新到点上
+ * 将 pregel 每轮迭代 map msg 更新到点上
  * @author napdada
  * @version : v 0.1 2021/12/25 11:33
  */
 public class UpdateEmb extends AbstractFunction3<Object, Vdata, HashMap<Long, float[]>, Vdata> implements Serializable {
-
     /**
      * 更新点的 embedding 和 feat
      * @param vID 点 ID

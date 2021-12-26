@@ -91,6 +91,11 @@ public class Dataset implements Serializable {
                     .partitionBy(Constants.EDGE_PARTITION2D);
         }
     }
+
+    /**
+     * 用于测试基本功能的 demo graph
+     * @return Graph<Vdata, Edata>
+     */
     public Graph<Vdata, Edata> demoGraph() {
         Edata edata = new Edata();
         ArrayList<Tuple2<Object, Vdata>> v = new ArrayList<>();
@@ -148,29 +153,25 @@ public class Dataset implements Serializable {
         }
     }
 
+    /**
+     * 新事件二度子图
+     * 1. 利用 pregel 获取新事件的 2DSubgraph（hop = 2、hop = 1、hop = 0），每轮 hop 递减
+     * 2. 将 2DSubgraph 中点的 Vfeat 发送回 src、dst，每轮 hop 递增
+     * @param src src ID
+     * @param dst dst ID
+     */
     public void event2DSubgraph(Long src, Long dst) {
-        // 利用 pregel 获取新事件的 2DSubgraph（hop = 2、hop = 1、hop = 0）
-        graph = demoGraph();
         Graph<Vdata, Edata> oldGraph = graph;
         GraphOps<Vdata, Edata> graphOps = graph.ops();
         graph = graphOps.pregel(2, 2, EdgeDirection.Out(),
                 new UpdateHop(), new SendHop(src, dst), new MergeHop(), Constants.INTEGER_CLASS_TAG);
         oldGraph.unpersist(false);
 
-        List<Tuple2<Object, Vdata>> list = graph.vertices().toJavaRDD().collect();
-
-        // 将 2DSubgraph 中点的 Vfeat 发送回 src、dst
-        // 1. 第一轮 hop = 0 发给 hop = 1，hop = 1 汇总
-        // 2. 第二轮 hop = 1 发给 hop = 2，hop = 2 汇总
-        // 3. 合并 src、dst 汇总结果
         Graph<Vdata, Edata> oldGraph2 = graph;
         GraphOps<Vdata, Edata> graphOps2 = graph.ops();
         graph = graphOps2.pregel(new HashMap<>(), 3, EdgeDirection.Out(),
                 new Update2DSubgraph(), new SendVfeat(), new MergeVfeat(), Constants.SUBGRAPH_MAP_CLASS_TAG);
         oldGraph2.unpersist(false);
-
-        List<Tuple2<Object, Vdata>> list2 = graph.vertices().toJavaRDD().collect();
-
     }
 
     public void encoder(Long src, Long dst) {
@@ -178,15 +179,11 @@ public class Dataset implements Serializable {
         graph = graph.mapVertices(new UpdateFeat(src), Constants.VDATA_CLASS_TAG, tpEquals());
         oldGraph1.unpersist(false);
 
-        List<Tuple2<Object, Vdata>> list = graph.vertices().toJavaRDD().collect();
-
         Graph<Vdata, Edata> oldGraph2 = graph;
         GraphOps<Vdata, Edata> graphOps = graph.ops();
         graph = graphOps.pregel(new HashMap<>(), 3, EdgeDirection.Out(),
                 new UpdateEmb(), new SendEmb(src, dst), new MergeEmb(), Constants.EMBEDDING_MAP_CLASS_TAG);
         oldGraph2.unpersist(false);
-
-        List<Tuple2<Object, Vdata>> list2 = graph.vertices().toJavaRDD().collect();
     }
 
     public void decoder(float timestamp) {
@@ -230,21 +227,14 @@ public class Dataset implements Serializable {
     }
 
     /**
-     * 沿着 subgraph 的每条边给 dst 发送 Mail 并 merge 求平均
-     * @return VertexRDD<Mail> 求完平均后的 VertexRDD
-     */
-    public VertexRDD<Mail> getEdgeMsg() {
-        VertexRDD<Mail> vertexRDD = graph.aggregateMessages(new SendMail(), new MergeMail(),
-                TripletFields.All, Constants.MAIL_CLASS_TAG);
-        return vertexRDD.mapValues(new AvgMail(), Constants.MAIL_CLASS_TAG);
-    }
-
-    /**
      * 更新二度子图的点 mailbox
      */
     public void updateMailbox() {
         // getEdgeMsg() 沿着 subgraph 的每条边给 dst 发送 Mail 并 merge 求平均，outerJoinVertices() 更新点 mailbox
-        graph = graph.outerJoinVertices(getEdgeMsg(), new UpdateMailbox(),
+        VertexRDD<Mail> vertexRDD = graph.aggregateMessages(new SendMail(), new MergeMail(),
+                TripletFields.All, Constants.MAIL_CLASS_TAG);
+        vertexRDD = vertexRDD.mapValues(new AvgMail(), Constants.MAIL_CLASS_TAG);
+        graph = graph.outerJoinVertices(vertexRDD, new UpdateMailbox(),
                 Constants.MAIL_CLASS_TAG, Constants.VDATA_CLASS_TAG, tpEquals());
     }
 
