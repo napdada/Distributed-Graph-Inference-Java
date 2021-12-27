@@ -54,12 +54,13 @@ public class Edata implements Serializable {
         this.timeStamp = timeStamp;
     }
 
-    public Edata(Edata e, DecoderOutput decoderOutput) {
+    public Edata(Edata e, DecoderOutput decoderOutput, int accuracy) {
         this.feat = e.getFeat();
         this.label = e.getLabel();
         this.timeStamp = e.getTimeStamp();
         this.logits = decoderOutput.getLogic();
         this.labels = decoderOutput.getLabel();
+        this.accuracy = accuracy;
     }
 
     public Edata(Edata e, int accuracy) {

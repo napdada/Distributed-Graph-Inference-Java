@@ -174,6 +174,12 @@ public class Dataset implements Serializable {
         oldGraph2.unpersist(false);
     }
 
+    /**
+     * 将新事件 event(src, dst) 的二度子图输入 encoder 模型（在 src 上进行推理）获得 embedding
+     * 并通过 send embedding msg 方式将 embedding 结果发给二度子图中所有点，并更新 feat
+     * @param src srd ID
+     * @param dst dst ID
+     */
     public void encoder(Long src, Long dst) {
         Graph<Vdata, Edata> oldGraph1 = graph;
         graph = graph.mapVertices(new UpdateFeat(src), Constants.VDATA_CLASS_TAG, tpEquals());
@@ -186,15 +192,21 @@ public class Dataset implements Serializable {
         oldGraph2.unpersist(false);
     }
 
+    /**
+     * 将新事件 event(src, dst) 的 embedding 进行解码（输入到 decoder）
+     * 获得 logits、labels 并更新边 acc
+     * @param timestamp 边时间戳
+     */
     public void decoder(float timestamp) {
+        Graph<Vdata, Edata> oldGraph = graph;
         graph = graph.mapTriplets(new UpdateTriplet(timestamp), Constants.EDATA_CLASS_TAG);
+        oldGraph.unpersist(false);
     }
 
     public int evaluate() {
         EdgeRDD<Integer> edge = graph.edges().mapValues(new Acc(), Constants.INTEGER_CLASS_TAG);
         RDD<Edge<Integer>> negEdge = edge.filter(new NegEdge());
         negEdge.cache();
-        negEdge.checkpoint();
         int n = (int) negEdge.count();
         edge.unpersist(false);
         negEdge.unpersist(false);
@@ -202,18 +214,19 @@ public class Dataset implements Serializable {
     }
 
     public int evaluate(float timestamp) {
-        graph = graph.mapEdges(new UpdateAcc(timestamp), Constants.EDATA_CLASS_TAG);
-        List<Edge<Edata>> list = graph.edges().filter(new FilterByTs(timestamp)).toJavaRDD().collect();
-        return list.size();
+        RDD<Edge<Edata>> eRDD = graph.edges().filter(new FilterByTs(timestamp));
+        int n = (int) eRDD.count();
+        eRDD.unpersist(false);
+        return n;
     }
 
     /**
      * 对全图 graph 中同 src、dst 边进行合并（选最新的边）
      */
     public void mergeEdges() {
-        Graph<Vdata, Edata> newGraph = graph.groupEdges(new MergeEdge());
-        graph.unpersist(false);
-        graph = newGraph;
+        Graph<Vdata, Edata> oldGraph = graph;
+        graph = graph.groupEdges(new MergeEdge());
+        oldGraph.unpersist(false);
     }
 
     /**
@@ -222,7 +235,6 @@ public class Dataset implements Serializable {
     public void updateTimestamp(Long src, Long dst, float timestamp) {
         Graph<Vdata, Edata> oldGraph = graph;
         graph = graph.mapVertices(new UpdateTime(src, dst, timestamp), Constants.VDATA_CLASS_TAG, tpEquals());
-        graph.cache();
         oldGraph.unpersist(false);
     }
 
@@ -230,12 +242,15 @@ public class Dataset implements Serializable {
      * 更新二度子图的点 mailbox
      */
     public void updateMailbox() {
-        // getEdgeMsg() 沿着 subgraph 的每条边给 dst 发送 Mail 并 merge 求平均，outerJoinVertices() 更新点 mailbox
-        VertexRDD<Mail> vertexRDD = graph.aggregateMessages(new SendMail(), new MergeMail(),
+        VertexRDD<Mail> vRDD1 = graph.aggregateMessages(new SendMail(), new MergeMail(),
                 TripletFields.All, Constants.MAIL_CLASS_TAG);
-        vertexRDD = vertexRDD.mapValues(new AvgMail(), Constants.MAIL_CLASS_TAG);
-        graph = graph.outerJoinVertices(vertexRDD, new UpdateMailbox(),
+        VertexRDD<Mail> vRDD2 = vRDD1.mapValues(new AvgMail(), Constants.MAIL_CLASS_TAG);
+        Graph<Vdata, Edata> oldGraph = graph;
+        graph = graph.outerJoinVertices(vRDD2, new UpdateMailbox(),
                 Constants.MAIL_CLASS_TAG, Constants.VDATA_CLASS_TAG, tpEquals());
+        vRDD1.unpersist(false);
+        vRDD2.unpersist(false);
+        oldGraph.unpersist(false);
     }
 
     /**

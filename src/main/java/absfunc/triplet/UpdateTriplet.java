@@ -1,7 +1,9 @@
 package absfunc.triplet;
 
 import ai.djl.ndarray.NDArray;
+import ai.djl.ndarray.NDList;
 import ai.djl.ndarray.NDManager;
+import ai.djl.training.evaluator.Accuracy;
 import config.Constants;
 import dataset.Edata;
 import dataset.Vdata;
@@ -66,7 +68,13 @@ public class UpdateTriplet extends AbstractFunction1<EdgeTriplet<Vdata, Edata>, 
                 }
                 DecoderInput decoderInput = new DecoderInput(posEmb, posLabel, negEmb, negLabel);
                 DecoderOutput decoderOutput = decoder.infer(decoderInput);
-                return new Edata(e.attr(), decoderOutput);
+
+                NDArray logits = manager.create(decoderOutput.getLogic());
+                NDArray labels = manager.create(decoderOutput.getLabel());
+                Accuracy accuracy = new Accuracy();
+                long[] acc = accuracy.evaluate(new NDList(labels), new NDList(logits)).toLongArray();
+
+                return new Edata(e.attr(), decoderOutput, (int) acc[0]);
             }
         }
         return e.attr();

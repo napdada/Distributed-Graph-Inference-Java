@@ -1,5 +1,4 @@
 import config.Constants;
-import config.SparkInit;
 import dataset.Dataset;
 import dataset.Edata;
 import dataset.Vdata;
@@ -96,9 +95,10 @@ public class Main {
                 vertexRDD = dataset.getGraph().vertices();
                 actionTime += System.currentTimeMillis() - tmpTime;
 
-                if (num % 10 == 0) {
-                    count += dataset.evaluate();
-                }
+//                if (num % 10 == 0) {
+//                    count += dataset.evaluate();
+//                }
+                count += dataset.evaluate(timestamp);
                 System.out.println(num++);
             }
             bufferedReader.close();
@@ -116,8 +116,9 @@ public class Main {
 
             // 统计 acc
             tmpTime = System.currentTimeMillis();
-//            double accuracy = 1 - dataset.evaluate() / num;
-//            log.error("----------------- accuracy: {}  ----------------", accuracy);
+//            dataset.saveVertexFeat();
+            double accuracy = 1 - count * 1.0 / num;
+            log.error("----------------- accuracy: {}  ----------------", accuracy);
             log.error("----------------- count: {}  ----------------", count);
             log.error("----------------- 统计 acc: {} ms ----------------", System.currentTimeMillis() - tmpTime);
         } catch (Exception e) {
