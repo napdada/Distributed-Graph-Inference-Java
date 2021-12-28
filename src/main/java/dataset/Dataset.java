@@ -48,6 +48,30 @@ public class Dataset implements Serializable {
     }
 
     /**
+     * Test.java 使用，从 CSV 中读取数据并构图
+     */
+    public void readData() {
+        File csv = new File(this.path);
+        try {
+            // 1. 读取数据集中的边
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(csv));
+            String lineData = "";
+            ArrayList<Edge<Edata>> edgeList = new ArrayList<>();
+            lineData = bufferedReader.readLine();
+            while ((lineData = bufferedReader.readLine()) != null) {
+                String[] line = lineData.split(",");
+                edgeList.addAll(eventToEdge(line));
+            }
+            bufferedReader.close();
+
+            // 2. 构图
+            creatGraph(null, Constants.SC.parallelize(edgeList).rdd());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * 将事件转换成边 List
      * @param event 事件
      * @return ArrayList<Edge<Edata>> 边 List
@@ -126,27 +150,18 @@ public class Dataset implements Serializable {
     }
 
     /**
-     * 从 CSV 中读取数据并构图
+     * 对全图 graph 中同 src、dst 边进行合并（选最新的边）
      */
-    public void readData() {
-        File csv = new File(this.path);
-        try {
-            // 1. 读取数据集中的边
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(csv));
-            String lineData = "";
-            ArrayList<Edge<Edata>> edgeList = new ArrayList<>();
-            lineData = bufferedReader.readLine();
-            while ((lineData = bufferedReader.readLine()) != null) {
-                String[] line = lineData.split(",");
-                edgeList.addAll(eventToEdge(line));
-            }
-            bufferedReader.close();
+    public void mergeEdges() {
+        Graph<Vdata, Edata> oldGraph = graph;
+        graph = graph.groupEdges(new MergeEdge());
+    }
 
-            // 2. 构图
-            creatGraph(null, Constants.SC.parallelize(edgeList).rdd());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    /**
+     * 更新全图点的 timestamp 为最新相关事件的 timestamp
+     */
+    public void updateTimestamp(Long src, Long dst, float timestamp) {
+        graph = graph.mapVertices(new UpdateTime(src, dst, timestamp), Constants.VDATA_CLASS_TAG, tpEquals());
     }
 
     /**
@@ -181,6 +196,17 @@ public class Dataset implements Serializable {
     }
 
     /**
+     * 更新二度子图的点 mailbox
+     */
+    public void updateMailbox() {
+        VertexRDD<Mail> vRDD1 = graph.aggregateMessages(new SendMail(), new MergeMail(),
+                TripletFields.All, Constants.MAIL_CLASS_TAG);
+        VertexRDD<Mail> vRDD2 = vRDD1.mapValues(new AvgMail(), Constants.MAIL_CLASS_TAG);
+        graph = graph.outerJoinVertices(vRDD2, new UpdateMailbox(),
+                Constants.MAIL_CLASS_TAG, Constants.VDATA_CLASS_TAG, tpEquals());
+    }
+
+    /**
      * 将新事件 event(src, dst) 的 embedding 进行解码（输入到 decoder）
      * 获得 logits、labels 并更新边 acc
      * @param timestamp 边时间戳
@@ -205,32 +231,6 @@ public class Dataset implements Serializable {
         int n = (int) eRDD.count();
         eRDD.unpersist(false);
         return n;
-    }
-
-    /**
-     * 对全图 graph 中同 src、dst 边进行合并（选最新的边）
-     */
-    public void mergeEdges() {
-        Graph<Vdata, Edata> oldGraph = graph;
-        graph = graph.groupEdges(new MergeEdge());
-    }
-
-    /**
-     * 更新全图点的 timestamp 为最新相关事件的 timestamp
-     */
-    public void updateTimestamp(Long src, Long dst, float timestamp) {
-        graph = graph.mapVertices(new UpdateTime(src, dst, timestamp), Constants.VDATA_CLASS_TAG, tpEquals());
-    }
-
-    /**
-     * 更新二度子图的点 mailbox
-     */
-    public void updateMailbox() {
-        VertexRDD<Mail> vRDD1 = graph.aggregateMessages(new SendMail(), new MergeMail(),
-                TripletFields.All, Constants.MAIL_CLASS_TAG);
-        VertexRDD<Mail> vRDD2 = vRDD1.mapValues(new AvgMail(), Constants.MAIL_CLASS_TAG);
-        graph = graph.outerJoinVertices(vRDD2, new UpdateMailbox(),
-                Constants.MAIL_CLASS_TAG, Constants.VDATA_CLASS_TAG, tpEquals());
     }
 
     /**
