@@ -73,7 +73,7 @@ public class UpdateTriplet extends AbstractFunction1<EdgeTriplet<Vdata, Edata>, 
                 NDArray labels = manager.create(decoderOutput.getLabel());
                 Accuracy accuracy = new Accuracy();
                 long[] acc = accuracy.evaluate(new NDList(labels), new NDList(logits)).toLongArray();
-
+                Constants.ACCUMULATOR.add(acc[0]);
                 return new Edata(e.attr(), decoderOutput, (int) acc[0]);
             }
         }

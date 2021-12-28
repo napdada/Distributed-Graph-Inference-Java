@@ -7,6 +7,7 @@ import dataset.Vfeat;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.graphx.PartitionStrategy;
 import org.apache.spark.storage.StorageLevel;
+import org.apache.spark.util.LongAccumulator;
 import scala.reflect.ClassTag;
 import scala.reflect.ClassTag$;
 
@@ -40,9 +41,17 @@ public class Constants {
      */
     public static final String SPARK_MASTER = "local";
     /**
+     * Spark init
+     */
+    public static final SparkInit SPARK_INIT = new SparkInit();
+    /**
      * Java Spark Context
      */
-    public static final JavaSparkContext SC = new SparkInit().getSparkContext();
+    public static final JavaSparkContext SC = SPARK_INIT.getSparkContext();
+    /**
+     * 累加器
+     */
+    public static LongAccumulator ACCUMULATOR = SC.sc().longAccumulator();
 
     /**
      * 静态资源存储路径
