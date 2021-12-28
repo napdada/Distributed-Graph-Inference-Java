@@ -9,6 +9,7 @@ import lombok.Setter;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.graphx.*;
 import org.apache.spark.rdd.RDD;
+import org.apache.spark.util.LongAccumulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Tuple2;
@@ -43,11 +44,7 @@ public class Dataset implements Serializable {
     private Graph<Vdata, Edata> graph;
 
     public Dataset() {
-
-    }
-
-    public Dataset(String path) {
-        this.path = path;
+        this.path = Constants.RESULT_PATH;
     }
 
     /**
@@ -81,7 +78,6 @@ public class Dataset implements Serializable {
      */
     public void creatGraph(RDD<Tuple2<Object, Vdata>> vRDD, RDD<Edge<Edata>> eRDD) {
         if (vRDD != null) {
-            graph.unpersist(false);
             graph = Graph.apply(vRDD, eRDD, new Vdata(), Constants.STORAGE_LEVEL, Constants.STORAGE_LEVEL,
                     Constants.VDATA_CLASS_TAG, Constants.EDATA_CLASS_TAG)
                     .partitionBy(Constants.EDGE_PARTITION2D);
@@ -161,17 +157,13 @@ public class Dataset implements Serializable {
      * @param dst dst ID
      */
     public void event2DSubgraph(Long src, Long dst) {
-        Graph<Vdata, Edata> oldGraph = graph;
         GraphOps<Vdata, Edata> graphOps = graph.ops();
         graph = graphOps.pregel(2, 2, EdgeDirection.Out(),
                 new UpdateHop(), new SendHop(src, dst), new MergeHop(), Constants.INTEGER_CLASS_TAG);
-        oldGraph.unpersist(false);
 
-        Graph<Vdata, Edata> oldGraph2 = graph;
         GraphOps<Vdata, Edata> graphOps2 = graph.ops();
         graph = graphOps2.pregel(new HashMap<>(), 3, EdgeDirection.Out(),
                 new Update2DSubgraph(), new SendVfeat(), new MergeVfeat(), Constants.SUBGRAPH_MAP_CLASS_TAG);
-        oldGraph2.unpersist(false);
     }
 
     /**
@@ -181,15 +173,11 @@ public class Dataset implements Serializable {
      * @param dst dst ID
      */
     public void encoder(Long src, Long dst) {
-        Graph<Vdata, Edata> oldGraph1 = graph;
         graph = graph.mapVertices(new UpdateFeat(src), Constants.VDATA_CLASS_TAG, tpEquals());
-        oldGraph1.unpersist(false);
 
-        Graph<Vdata, Edata> oldGraph2 = graph;
         GraphOps<Vdata, Edata> graphOps = graph.ops();
         graph = graphOps.pregel(new HashMap<>(), 3, EdgeDirection.Out(),
                 new UpdateEmb(), new SendEmb(src, dst), new MergeEmb(), Constants.EMBEDDING_MAP_CLASS_TAG);
-        oldGraph2.unpersist(false);
     }
 
     /**
@@ -198,9 +186,7 @@ public class Dataset implements Serializable {
      * @param timestamp 边时间戳
      */
     public void decoder(float timestamp) {
-        Graph<Vdata, Edata> oldGraph = graph;
         graph = graph.mapTriplets(new UpdateTriplet(timestamp), Constants.EDATA_CLASS_TAG);
-        oldGraph.unpersist(false);
     }
 
     public int evaluate() {
@@ -215,6 +201,7 @@ public class Dataset implements Serializable {
 
     public int evaluate(float timestamp) {
         RDD<Edge<Edata>> eRDD = graph.edges().filter(new FilterByTs(timestamp));
+        eRDD.cache();
         int n = (int) eRDD.count();
         eRDD.unpersist(false);
         return n;
@@ -226,16 +213,13 @@ public class Dataset implements Serializable {
     public void mergeEdges() {
         Graph<Vdata, Edata> oldGraph = graph;
         graph = graph.groupEdges(new MergeEdge());
-        oldGraph.unpersist(false);
     }
 
     /**
      * 更新全图点的 timestamp 为最新相关事件的 timestamp
      */
     public void updateTimestamp(Long src, Long dst, float timestamp) {
-        Graph<Vdata, Edata> oldGraph = graph;
         graph = graph.mapVertices(new UpdateTime(src, dst, timestamp), Constants.VDATA_CLASS_TAG, tpEquals());
-        oldGraph.unpersist(false);
     }
 
     /**
@@ -245,12 +229,8 @@ public class Dataset implements Serializable {
         VertexRDD<Mail> vRDD1 = graph.aggregateMessages(new SendMail(), new MergeMail(),
                 TripletFields.All, Constants.MAIL_CLASS_TAG);
         VertexRDD<Mail> vRDD2 = vRDD1.mapValues(new AvgMail(), Constants.MAIL_CLASS_TAG);
-        Graph<Vdata, Edata> oldGraph = graph;
         graph = graph.outerJoinVertices(vRDD2, new UpdateMailbox(),
                 Constants.MAIL_CLASS_TAG, Constants.VDATA_CLASS_TAG, tpEquals());
-        vRDD1.unpersist(false);
-        vRDD2.unpersist(false);
-        oldGraph.unpersist(false);
     }
 
     /**

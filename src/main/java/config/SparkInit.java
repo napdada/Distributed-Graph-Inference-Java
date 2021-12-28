@@ -2,7 +2,11 @@ package config;
 
 import lombok.Data;
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Spark 初始化
@@ -37,5 +41,9 @@ public class SparkInit {
         sparkConf = new SparkConf().setAppName(appName).setMaster(master);
         sparkContext = new JavaSparkContext(sparkConf);
         sparkContext.setCheckpointDir(Constants.CHECKPOINT_PATH);
+    }
+
+    public void unpersistAll() {
+        Map<Integer, JavaRDD<?>> map = sparkContext.getPersistentRDDs();
     }
 }

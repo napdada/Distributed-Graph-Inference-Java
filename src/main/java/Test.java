@@ -1,9 +1,14 @@
+import ai.djl.ndarray.NDArray;
+import ai.djl.ndarray.NDList;
+import ai.djl.ndarray.NDManager;
+import ai.djl.training.evaluator.Accuracy;
 import config.Constants;
 import config.SparkInit;
 import dataset.*;
 import model.Encoder;
 
 import java.io.*;
+import java.util.Arrays;
 
 /**
  * @author napdada
@@ -59,7 +64,7 @@ public class Test {
         Encoder encoder = Encoder.getInstance();
 
         System.out.println("-------- 开始读取数据并构图 --------");
-        Dataset dataset = new Dataset(Constants.DATASET_PATH);
+        Dataset dataset = new Dataset();
         dataset.readData();
         dataset.printAll();
 
@@ -95,6 +100,16 @@ public class Test {
         Test test = new Test();
 //        test.reddit();
 
-        test.test();
+//        test.test();
+        try(NDManager manager = NDManager.newBaseManager()) {
+            float[] logit = {0,0,0,0, (float) 2};
+            float[] label = {0,0,0,0,0};
+            NDArray logits = manager.create(logit);
+            NDArray labels = manager.create(label);
+            Accuracy accuracy = new Accuracy();
+            long[] acc = accuracy.evaluate(new NDList(labels), new NDList(logits)).toLongArray();
+            System.out.println(Arrays.toString(acc));
+        }
+
     }
 }

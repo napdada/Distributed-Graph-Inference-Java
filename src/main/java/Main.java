@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.graphx.Edge;
 import org.apache.spark.rdd.RDD;
+import org.apache.spark.util.LongAccumulator;
 import scala.Tuple2;
 
 import java.io.*;
@@ -22,12 +23,13 @@ public class Main {
             // 1. Spark 初始化
             long sparkInitTime = System.currentTimeMillis();
             JavaSparkContext sc = Constants.SC;
+            LongAccumulator accumulator = sc.sc().longAccumulator();
             log.error("----------------- Spark 初始化耗时：{} ms ----------------", System.currentTimeMillis() - sparkInitTime);
 
             // 2. 初始化数据集配置、图配置、模型配置
             long initTime = System.currentTimeMillis(), createGraphTime = 0, mergeTime = 0, updateTsTime = 0, genNeighborTime = 0,
                     inferTime = 0, updateMailboxTime = 0, decoderTime = 0, actionTime = 0, tmpTime;
-            int num = 1;
+            int num = 1, count = 0;
             File datasetCsv = new File(Constants.DATASET_PATH);
             BufferedReader bufferedReader = new BufferedReader(new FileReader(datasetCsv));
             Dataset dataset = new Dataset();
@@ -37,7 +39,6 @@ public class Main {
             String[] line;
             long srcID, dstID;
             float timestamp;
-            int count = 0;
             log.error("----------------- 初始化配置耗时：{} ms ----------------", System.currentTimeMillis() - initTime);
 
             // 3. 图推理
@@ -98,8 +99,10 @@ public class Main {
 //                if (num % 10 == 0) {
 //                    count += dataset.evaluate();
 //                }
-                count += dataset.evaluate(timestamp);
+//                count += dataset.evaluate(timestamp);
+                Constants.SPARK_INIT.unpersistAll();
                 System.out.println(num++);
+                System.out.println(Constants.ACCUMULATOR);
             }
             bufferedReader.close();
             long endTime = System.currentTimeMillis();
@@ -117,6 +120,7 @@ public class Main {
             // 统计 acc
             tmpTime = System.currentTimeMillis();
 //            dataset.saveVertexFeat();
+            dataset.printAll();
             double accuracy = 1 - count * 1.0 / num;
             log.error("----------------- accuracy: {}  ----------------", accuracy);
             log.error("----------------- count: {}  ----------------", count);
