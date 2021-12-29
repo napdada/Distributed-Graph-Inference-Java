@@ -1,6 +1,7 @@
 package dataset;
 
-import absfunc.edge.*;
+import absfunc.edge.FilterByTs;
+import absfunc.edge.MergeEdge;
 import absfunc.triplet.*;
 import absfunc.vertex.*;
 import config.Constants;
@@ -13,7 +14,9 @@ import org.slf4j.LoggerFactory;
 import scala.Tuple2;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * 图数据集（csv 格式）
@@ -209,16 +212,13 @@ public class Dataset implements Serializable {
         graph = graph.mapTriplets(new UpdateTriplet(timestamp), Constants.EDATA_CLASS_TAG);
     }
 
-    public int evaluate() {
-        EdgeRDD<Integer> edge = graph.edges().mapValues(new Acc(), Constants.INTEGER_CLASS_TAG);
-        RDD<Edge<Integer>> negEdge = edge.filter(new NegEdge());
-        negEdge.cache();
-        int n = (int) negEdge.count();
-        edge.unpersist(false);
-        negEdge.unpersist(false);
-        return n;
-    }
-
+    /**
+     * 评估图推理结果，统计 accuracy
+     * @param src src ID
+     * @param dst dst ID
+     * @param num 迭代轮次
+     * @return accuracy 数
+     */
     public int evaluate(Long src, Long dst, int num) {
         RDD<Edge<Edata>> eRDD = graph.edges().filter(new FilterByTs(src, dst));
         eRDD.cache();
