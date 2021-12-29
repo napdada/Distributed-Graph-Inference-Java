@@ -96,9 +96,10 @@ public class Main {
                 vRDD = dataset.getGraph().vertices();
                 actionTime += System.currentTimeMillis() - tmpTime;
 
-//                if (num % 10 == 0) {
-//                    count += dataset.evaluate();
-//                }
+                if (num % 10 == 0) {
+                    dataset.getGraph().cache();
+                    dataset.getGraph().checkpoint();
+                }
                 count += dataset.evaluate(srcID, dstID, num);
                 Constants.SPARK_INIT.unpersistAll(num);
                 System.out.println(num++);
