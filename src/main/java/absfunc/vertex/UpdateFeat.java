@@ -55,7 +55,9 @@ public class UpdateFeat extends AbstractFunction2<Object, Vdata, Vdata> implemen
             for (int j = 0; j < index.length; j++) {
                 embedding.put(index[j], encoderOutput.getEmbedding()[j]);
             }
-            Vdata vdata = new Vdata((Long) vID, v, embedding);
+            // TODO: 可以优化成 v.setEmbedding()，但是 set 后后续的 send 里 srcAttr 依赖没变（BUG，不知道原因）
+            Vdata vdata = new Vdata((Long) vID, v);
+            vdata.setEmbedding(embedding);
             vdata.setFeat(embedding.get((Long) vID));
             return vdata;
         }

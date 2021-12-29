@@ -1,5 +1,6 @@
 package dataset;
 
+import config.Constants;
 import lombok.Getter;
 import lombok.Setter;
 import model.DecoderOutput;
@@ -16,10 +17,6 @@ import java.util.Arrays;
 @Getter
 @Setter
 public class Edata implements Serializable {
-    /**
-     * 边特征维度
-     */
-    private int featDim;
     /**
      * 边特征
      */
@@ -46,27 +43,27 @@ public class Edata implements Serializable {
     private int accuracy;
 
     public Edata() {
-
+        this.feat = new float[Constants.FEATURE_DIM];
+        this.label = 0;
+        this.timeStamp = 0;
     }
 
-    public Edata(int featDim, float[] feat, int label, float timeStamp) {
-        this.featDim = featDim;
+    public Edata(float[] feat, int label, float timeStamp) {
         this.feat = feat;
         this.label = label;
         this.timeStamp = timeStamp;
     }
 
-    public Edata(Edata e, DecoderOutput decoderOutput) {
-        this.featDim = e.getFeatDim();
+    public Edata(Edata e, DecoderOutput decoderOutput, int accuracy) {
         this.feat = e.getFeat();
         this.label = e.getLabel();
         this.timeStamp = e.getTimeStamp();
         this.logits = decoderOutput.getLogic();
         this.labels = decoderOutput.getLabel();
+        this.accuracy = accuracy;
     }
 
     public Edata(Edata e, int accuracy) {
-        this.featDim = e.getFeatDim();
         this.feat = e.getFeat();
         this.label = e.getLabel();
         this.timeStamp = e.getTimeStamp();
@@ -78,12 +75,12 @@ public class Edata implements Serializable {
     @Override
     public String toString() {
         return "Edata{" +
-                "featDim=" + featDim +
-                ", feat=" + Arrays.toString(feat) +
+                "feat=" + Arrays.toString(feat) +
                 ", label=" + label +
                 ", timeStamp=" + timeStamp +
                 ", logits=" + Arrays.toString(logits) +
                 ", labels=" + Arrays.toString(labels) +
+                ", accuracy=" + accuracy +
                 '}';
     }
 }

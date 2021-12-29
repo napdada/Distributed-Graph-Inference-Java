@@ -1,9 +1,14 @@
+import ai.djl.ndarray.NDArray;
+import ai.djl.ndarray.NDList;
+import ai.djl.ndarray.NDManager;
+import ai.djl.training.evaluator.Accuracy;
 import config.Constants;
 import config.SparkInit;
 import dataset.*;
 import model.Encoder;
 
 import java.io.*;
+import java.util.Arrays;
 
 /**
  * @author napdada
@@ -56,11 +61,10 @@ public class Test {
 
     public void test() {
         System.out.println("-------- Spark init --------");
-        SparkInit sparkInit = new SparkInit();
         Encoder encoder = Encoder.getInstance();
 
         System.out.println("-------- 开始读取数据并构图 --------");
-        Dataset dataset = new Dataset(Constants.DATASET_PATH, sparkInit.getSparkContext());
+        Dataset dataset = new Dataset();
         dataset.readData();
         dataset.printAll();
 
@@ -69,11 +73,11 @@ public class Test {
         dataset.printAll();
 
         System.out.println("--------  测试 updateTimestamp --------");
-        dataset.updateTimestamp();
+        dataset.updateTimestamp((long) 0, (long) 1, 1);
         dataset.printAll();
 
         System.out.println("-------- 测试 genNeighbor --------");
-        dataset.genNeighbor();
+        dataset.event2DSubgraph((long) 0, (long) 1);
         dataset.printAll();
 
         Long vertexID = 0L;
@@ -96,6 +100,16 @@ public class Test {
         Test test = new Test();
 //        test.reddit();
 
-        test.test();
+//        test.test();
+        try(NDManager manager = NDManager.newBaseManager()) {
+            float[] logit = {0,0,0,0, (float) 2};
+            float[] label = {0,0,0,0,0};
+            NDArray logits = manager.create(logit);
+            NDArray labels = manager.create(label);
+            Accuracy accuracy = new Accuracy();
+            long[] acc = accuracy.evaluate(new NDList(labels), new NDList(logits)).toLongArray();
+            System.out.println(Arrays.toString(acc));
+        }
+
     }
 }

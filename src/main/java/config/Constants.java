@@ -3,10 +3,15 @@ package config;
 import dataset.Edata;
 import dataset.Mail;
 import dataset.Vdata;
+import dataset.Vfeat;
+import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.graphx.PartitionStrategy;
 import org.apache.spark.storage.StorageLevel;
+import org.apache.spark.util.LongAccumulator;
 import scala.reflect.ClassTag;
 import scala.reflect.ClassTag$;
+
+import java.util.HashMap;
 
 /**
  * 配置常量集合
@@ -35,7 +40,6 @@ public class Constants {
      * Spark 集群 URL（eg. "local"、"spark:master7077"）
      */
     public static final String SPARK_MASTER = "local";
-
     /**
      * 静态资源存储路径
      */
@@ -52,6 +56,19 @@ public class Constants {
      * checkpoint 路径
      */
     public static String CHECKPOINT_PATH = RESOURCE_PATH + "checkpoint/";
+    /**
+     * Spark init
+     */
+    public static final SparkInit SPARK_INIT = new SparkInit();
+    /**
+     * Java Spark Context
+     */
+    public static final JavaSparkContext SC = SPARK_INIT.getSparkContext();
+    /**
+     * 累加器
+     */
+    public static LongAccumulator ACCUMULATOR = SC.sc().longAccumulator();
+
     /**
      * 点边特征维度
      */
@@ -109,7 +126,6 @@ public class Constants {
      * Encoder 中是否使用 position embedding
      */
     public static final boolean POSITION_EMBEDDING = true;
-
     /**
      * Encoder 和 Decoder 模型输入名称映射（Java -> Python）
      */
@@ -121,7 +137,10 @@ public class Constants {
     public static final String NEG_EMB = "neg_emb";
     public static final String POS_LABEL = "pos_label";
     public static final String NEG_LABEL = "neg_label";
-
+    /**
+     * 每一轮图推理最后计算结果 RDD name
+     */
+    public static final String RDD_NAME = " final RDD";
     /**
      * GraphX 中图为有向 or 无向
      */
@@ -146,6 +165,7 @@ public class Constants {
      * subgraph 跳数
      */
     public static final int HOP_NUN = 2;
+
     /**
      * GraphX 中自定义点属性的 class tag
      */
@@ -166,4 +186,12 @@ public class Constants {
      * Float tag
      */
     public static final ClassTag<Float> FLOAT_CLASS_TAG = ClassTag$.MODULE$.apply(Float.class);
+    /**
+     * HashMap<Long, Vfeat> 二度子图 map tag
+     */
+    public static final ClassTag<HashMap<Long, Vfeat>> SUBGRAPH_MAP_CLASS_TAG = ClassTag$.MODULE$.apply(HashMap.class);
+    /**
+     * HashMap<Long, float[]> embedding map tag
+     */
+    public static final ClassTag<HashMap<Long, float[]>> EMBEDDING_MAP_CLASS_TAG = ClassTag$.MODULE$.apply(HashMap.class);
 }

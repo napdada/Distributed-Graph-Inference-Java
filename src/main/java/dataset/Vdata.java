@@ -1,10 +1,8 @@
 package dataset;
 
-import com.alibaba.fastjson.JSONArray;
 import config.Constants;
 import lombok.Getter;
 import lombok.Setter;
-import model.EncoderInput;
 
 import java.io.Serializable;
 import java.util.*;
@@ -19,10 +17,6 @@ import java.util.*;
 @Setter
 public class Vdata implements Serializable {
     private Long id;
-    /**
-     * 节点特征维度（eg. wikipedia 172 维）
-     */
-    private int featDim = Constants.FEATURE_DIM;
     /**
      * 节点特征
      */
@@ -40,17 +34,9 @@ public class Vdata implements Serializable {
      */
     private float timestamp;
     /**
-     * 当前点的两度邻居点和边
+     * 跳数
      */
-    private HashSet<String> subgraph2D;
-    /**
-     * 当前点的两度邻居点特征
-     */
-    private HashMap<Long, Vfeat> subgraph2DFeat;
-    /**
-     * 新发生事件的两度邻居点和边
-     */
-    private HashSet<String> eventSubgraph2D;
+    private int hop;
     /**
      * 新发生事件的两度点特征
      */
@@ -61,71 +47,44 @@ public class Vdata implements Serializable {
     private HashMap<Long, float[]> embedding;
 
     public Vdata() {
-        this.feat = new float[featDim];
+        this.feat = new float[Constants.FEATURE_DIM];
         this.mailbox = new ArrayList<>();
         this.lastUpdate = 0L;
-        this.subgraph2D = new HashSet<>();
-        this.subgraph2DFeat = new HashMap<>();
-        this.eventSubgraph2D = new HashSet<>();
         this.eventSubgraph2DFeat = new HashMap<>();
         this.embedding = new HashMap<>();
     }
 
-    public Vdata(Long id, Vdata vdata, HashSet<String> subgraph2D, HashMap<Long, Vfeat> subgraph2DFeat,
-                 HashSet<String> eventSubgraph2D, HashMap<Long, Vfeat> eventSubgraph2DFeat) {
+    public Vdata(Long id, Vdata vdata) {
         this.id = id;
         this.feat = vdata.getFeat();
         this.mailbox = vdata.getMailbox();
         this.lastUpdate = vdata.getLastUpdate();
         this.timestamp = vdata.getTimestamp();
-        this.subgraph2D = subgraph2D == null ? new HashSet<>() : subgraph2D;
-        this.subgraph2DFeat = subgraph2DFeat == null ? new HashMap<>() : subgraph2DFeat;
-        this.eventSubgraph2D = eventSubgraph2D == null ? new HashSet<>() : eventSubgraph2D;
-        this.eventSubgraph2DFeat = eventSubgraph2DFeat == null ? new HashMap<>() : eventSubgraph2DFeat;
+        this.hop = vdata.getHop();
+        this.eventSubgraph2DFeat = vdata.getEventSubgraph2DFeat();
         this.embedding = vdata.getEmbedding();
     }
 
-    public Vdata(HashSet<String> subgraph2D, HashMap<Long, Vfeat> subgraph2DFeat) {
-        this.subgraph2D = subgraph2D == null ? new HashSet<>() : subgraph2D;
-        this.subgraph2DFeat = subgraph2DFeat == null ? new HashMap<>() : subgraph2DFeat;
-        this.eventSubgraph2D = new HashSet<>();
-        this.eventSubgraph2DFeat = new HashMap<>();
-    }
-
-    public Vdata(HashSet<String> eventSubgraph2D) {
-        this.eventSubgraph2D = eventSubgraph2D;
-    }
-
-    public Vdata(HashMap<Long, float[]> embedding) {
-        this.embedding = embedding;
-    }
-
-    public Vdata(Long id, Vdata vdata, HashMap<Long, float[]> embedding) {
+    public Vdata(Long id, Vdata vdata, HashMap<Long, Vfeat> eventSubgraph2DFeat) {
         this.id = id;
-        this.featDim = vdata.getFeatDim();
         this.feat = vdata.getFeat();
         this.mailbox = vdata.getMailbox();
         this.lastUpdate = vdata.getLastUpdate();
         this.timestamp = vdata.getTimestamp();
-        this.subgraph2D = vdata.getSubgraph2D();
-        this.subgraph2DFeat = vdata.getSubgraph2DFeat();
-        this.eventSubgraph2D = vdata.getEventSubgraph2D();
-        this.eventSubgraph2DFeat = vdata.getEventSubgraph2DFeat();
-        this.embedding = embedding;
+        this.hop = vdata.getHop();
+        this.eventSubgraph2DFeat = eventSubgraph2DFeat;
+        this.embedding = vdata.getEmbedding();
+
     }
 
-    public Vdata(Long id, Vdata vdata, float[] feat, HashMap<Long, float[]> embedding) {
+    public Vdata(Long id, float lastUpdate, float timestamp) {
         this.id = id;
-        this.featDim = vdata.getFeatDim();
-        this.feat = feat;
-        this.mailbox = vdata.getMailbox();
-        this.lastUpdate = vdata.getLastUpdate();
-        this.timestamp = vdata.getTimestamp();
-        this.subgraph2D = vdata.getSubgraph2D();
-        this.subgraph2DFeat = vdata.getSubgraph2DFeat();
-        this.eventSubgraph2D = vdata.getEventSubgraph2D();
-        this.eventSubgraph2DFeat = vdata.getEventSubgraph2DFeat();
-        this.embedding = embedding;
+        this.feat = new float[Constants.FEATURE_DIM];
+        this.mailbox = new ArrayList<>();
+        this.lastUpdate = lastUpdate;
+        this.timestamp = timestamp;
+        this.eventSubgraph2DFeat = new HashMap<>();
+        this.embedding = new HashMap<>();
     }
 
     public Vdata(Long id, float[] feat, ArrayList<Mail> mailbox, float lastUpdate, float timestamp) {
@@ -134,9 +93,6 @@ public class Vdata implements Serializable {
         this.mailbox = mailbox;
         this.lastUpdate = lastUpdate;
         this.timestamp = timestamp;
-        this.subgraph2D = new HashSet<>();
-        this.subgraph2DFeat = new HashMap<>();
-        this.eventSubgraph2D = new HashSet<>();
         this.eventSubgraph2DFeat = new HashMap<>();
         this.embedding = new HashMap<>();
     }
@@ -148,22 +104,6 @@ public class Vdata implements Serializable {
         while (mailbox.size() < Constants.MAILBOX_LEN) {
             mailbox.add(new Mail());
         }
-    }
-
-    public EncoderInput subGraphToInputdata() {
-        int vNum = eventSubgraph2DFeat.size(), i = 0;
-        float[][] feat = new float[vNum][];
-        float[][][] mail = new float[vNum][][];
-        float[] lastUpdate = new float[vNum], timestamp = new float[vNum];
-
-        for (Map.Entry<Long, Vfeat> entry : eventSubgraph2DFeat.entrySet()) {
-            feat[i] = entry.getValue().getFeat();
-            mail[i] = entry.getValue().mailboxToArray();
-            lastUpdate[i] = entry.getValue().getLastUpdate();
-            timestamp[i] = entry.getValue().getTimestamp();
-            i++;
-        }
-        return new EncoderInput(feat, mail, lastUpdate, timestamp);
     }
 
     /**
@@ -197,45 +137,15 @@ public class Vdata implements Serializable {
         return sb.append(']').toString();
     }
 
-    /**
-     * 将 mailbox 转为 JSONArray
-     * @return JSONArray
-     */
-    public JSONArray mailboxToJSON() {
-        JSONArray mailJSONArray = new JSONArray();
-        alignMailbox();
-        for (Mail mail : mailbox) {
-            mailJSONArray.add(mail.getFeat());
-        }
-        return mailJSONArray;
-    }
-
-    /**
-     * 将 mailbox 转为 Array
-     * @return float[][]
-     */
-    public float[][] mailboxToArray() {
-        int i = 0;
-        float[][] mails = new float[Constants.MAILBOX_LEN][];
-        alignMailbox();
-        for (Mail mail : mailbox) {
-            mails[i++] = mail.getFeat();
-        }
-        return mails;
-    }
-
     @Override
     public String toString() {
         return "Vdata{" +
                 "id=" + id +
-                ", featDim=" + featDim +
                 ", feat=" + Arrays.toString(feat) +
                 ", mailbox=" + mailbox +
                 ", lastUpdate=" + lastUpdate +
                 ", timestamp=" + timestamp +
-                ", subgraph2D=" + subgraph2D +
-                ", subgraph2DFeat=" + subgraph2DFeat +
-                ", eventSubgraph2D=" + eventSubgraph2D +
+                ", hop=" + hop +
                 ", eventSubgraph2DFeat=" + eventSubgraph2DFeat +
                 ", embedding=" + embedding +
                 '}';

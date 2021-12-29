@@ -1,21 +1,16 @@
 import config.Constants;
-import config.SparkInit;
 import dataset.Dataset;
 import dataset.Edata;
 import dataset.Vdata;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.spark.Dependency;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.graphx.Edge;
-import org.apache.spark.graphx.Graph;
-import org.apache.spark.graphx.Pregel;
 import org.apache.spark.rdd.RDD;
+import org.apache.spark.util.LongAccumulator;
 import scala.Tuple2;
-import scala.collection.Seq;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.List;
 
 /**
  * @author napdada
@@ -27,25 +22,23 @@ public class Main {
         try {
             // 1. Spark 初始化
             long sparkInitTime = System.currentTimeMillis();
-            SparkInit sparkInit = new SparkInit();
-            JavaSparkContext sc = sparkInit.getSparkContext();
+            JavaSparkContext sc = Constants.SC;
+            LongAccumulator accumulator = sc.sc().longAccumulator();
             log.error("----------------- Spark 初始化耗时：{} ms ----------------", System.currentTimeMillis() - sparkInitTime);
 
             // 2. 初始化数据集配置、图配置、模型配置
             long initTime = System.currentTimeMillis(), createGraphTime = 0, mergeTime = 0, updateTsTime = 0, genNeighborTime = 0,
                     inferTime = 0, updateMailboxTime = 0, decoderTime = 0, actionTime = 0, tmpTime;
-            int num = 1;
+            int num = 1, count = 0;
             File datasetCsv = new File(Constants.DATASET_PATH);
             BufferedReader bufferedReader = new BufferedReader(new FileReader(datasetCsv));
-            Dataset dataset = new Dataset(sc);
-            Graph<Vdata, Edata> oldGraph = null;
-            RDD<Tuple2<Object, Vdata>> vertexRDD = null;
-            RDD<Edge<Edata>> edgeRDD = null;
+            Dataset dataset = new Dataset();
+            RDD<Tuple2<Object, Vdata>> vRDD = null;
+            RDD<Edge<Edata>> eRDD = null;
             String lineData;
             String[] line;
             long srcID, dstID;
             float timestamp;
-            int count = 0;
             log.error("----------------- 初始化配置耗时：{} ms ----------------", System.currentTimeMillis() - initTime);
 
             // 3. 图推理
@@ -59,15 +52,15 @@ public class Main {
                 srcID = Long.parseLong(line[Constants.SRC_ID_INDEX]);
                 dstID = Long.parseLong(line[Constants.DST_ID_INDEX]);
                 timestamp = Float.parseFloat(line[Constants.TIMESTAMP_INDEX]);
-                if (edgeRDD == null) {
-                    edgeRDD = sc.parallelize(dataset.eventToEdge(line)).rdd();
+                if (eRDD == null) {
+                    eRDD = sc.parallelize(dataset.eventToEdge(line)).rdd();
                 } else {
-                    edgeRDD = edgeRDD.union(sc.parallelize(dataset.eventToEdge(line)).rdd());
+                    eRDD = eRDD.union(sc.parallelize(dataset.eventToEdge(line)).rdd());
                 }
-                dataset.creatGraph(vertexRDD, edgeRDD);
+                // creatGraph
+                dataset.creatGraph(vRDD, eRDD);
                 createGraphTime += System.currentTimeMillis() - tmpTime;
 
-                oldGraph = dataset.getGraph();
                 // mergeEdges
                 tmpTime = System.currentTimeMillis();
                 dataset.mergeEdges();
@@ -75,12 +68,12 @@ public class Main {
 
                 // updateTimestamp
                 tmpTime = System.currentTimeMillis();
-                dataset.updateTimestamp();
+                dataset.updateTimestamp(srcID, dstID, timestamp);
                 updateTsTime += System.currentTimeMillis() - tmpTime;
 
                 // genNeighbor
                 tmpTime = System.currentTimeMillis();
-                dataset.genNeighbor();
+                dataset.event2DSubgraph(srcID, dstID);
                 genNeighborTime += System.currentTimeMillis() - tmpTime;
 
                 // infer
@@ -99,18 +92,18 @@ public class Main {
                 decoderTime += System.currentTimeMillis() - tmpTime;
 
                 tmpTime = System.currentTimeMillis();
-                edgeRDD = dataset.getGraph().edges();
-                vertexRDD = dataset.getGraph().vertices();
-                oldGraph.unpersistVertices(false);
-                oldGraph.edges().unpersist(false);
+                eRDD = dataset.getGraph().edges();
+                vRDD = dataset.getGraph().vertices();
                 actionTime += System.currentTimeMillis() - tmpTime;
 
                 if (num % 10 == 0) {
                     dataset.getGraph().cache();
                     dataset.getGraph().checkpoint();
-                    count += dataset.evaluate();
                 }
+                count += dataset.evaluate(srcID, dstID, num);
+                Constants.SPARK_INIT.unpersistAll(num);
                 System.out.println(num++);
+                System.out.println("count = " + count);
             }
             bufferedReader.close();
             long endTime = System.currentTimeMillis();
@@ -127,9 +120,9 @@ public class Main {
 
             // 统计 acc
             tmpTime = System.currentTimeMillis();
-
-//            double accuracy = 1 - dataset.evaluate() / num;
-//            log.error("----------------- accuracy: {}  ----------------", accuracy);
+//            dataset.saveVertexFeat();
+            double accuracy = 1 - count * 1.0 / num;
+            log.error("----------------- accuracy: {}  ----------------", accuracy);
             log.error("----------------- count: {}  ----------------", count);
             log.error("----------------- 统计 acc: {} ms ----------------", System.currentTimeMillis() - tmpTime);
         } catch (Exception e) {

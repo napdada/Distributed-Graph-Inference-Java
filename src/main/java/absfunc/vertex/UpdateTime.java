@@ -5,8 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.Option;
-import scala.runtime.AbstractFunction3;
+import scala.runtime.AbstractFunction2;
 
 import java.io.Serializable;
 
@@ -18,26 +17,44 @@ import java.io.Serializable;
  */
 @Getter
 @Setter
-public class UpdateTime extends AbstractFunction3<Object, Vdata, Option<Float>, Vdata> implements Serializable {
+public class UpdateTime extends AbstractFunction2<Object, Vdata, Vdata> implements Serializable {
     /**
      * Log
      */
     private static final Logger logger = LoggerFactory.getLogger(UpdateTime.class);
 
     /**
-     * 更新点的 lastUpdate 或 timestamp
-     * @note 【！！！不能直接用 v.setTimestamp() 否则所有点的 timestamp 都被改了，需要 new Vdata()，原因未知！！！】
+     * src ID
+     */
+    private Long src;
+    /**
+     * dst ID
+     */
+    private Long dst;
+    /**
+     * (src, dst) 最新事件时间戳
+     */
+    private float timestamp;
+
+    public UpdateTime(Long src, Long dst, float timestamp) {
+        this.src = src;
+        this.dst = dst;
+        this.timestamp = timestamp;
+    }
+    /**
+     * 更新点的 lastUpdate 和 timestamp
      * @param vID 点 ID
      * @param v 待更新的点
-     * @param newV 新的 time
      * @return 更新后的点
      */
     @Override
-    public Vdata apply(Object vID, Vdata v, Option<Float> newV) {
-        if (!newV.isEmpty()) {
-            // 【！！！不能直接用 v.setTimestamp() 否则所有点的 timestamp 都被改了，需要 new Vdata()，原因未知！！！】
-            // v2.setTimestamp(v3.get());
-            return new Vdata((Long) vID, v.getFeat(), v.getMailbox(), newV.get(), newV.get());
+    public Vdata apply(Object vID, Vdata v) {
+        if (vID.equals(src) || vID.equals(dst)) {
+            if (v.getMailbox().size() != 0) {
+                return new Vdata((Long) vID, v.getFeat(), v.getMailbox(), timestamp, timestamp);
+            } else {
+                return new Vdata((Long) vID, timestamp, timestamp);
+            }
         }
         return v;
     }
