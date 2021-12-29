@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.graphx.Edge;
 import org.apache.spark.rdd.RDD;
-import org.apache.spark.util.LongAccumulator;
 import scala.Tuple2;
 
 import java.io.*;

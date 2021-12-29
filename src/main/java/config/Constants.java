@@ -151,7 +151,7 @@ public class Constants {
     /**
      * GraphX 分区数量
      */
-    public static final int PARTITION_NUM = 16;
+    public static final int PARTITION_NUM = 2;
     /**
      * mailbox 的最大容量
      */

@@ -102,11 +102,11 @@ public class Dataset implements Serializable {
         if (vRDD != null) {
             graph = Graph.apply(vRDD, eRDD, new Vdata(), Constants.STORAGE_LEVEL, Constants.STORAGE_LEVEL,
                     Constants.VDATA_CLASS_TAG, Constants.EDATA_CLASS_TAG)
-                    .partitionBy(Constants.EDGE_PARTITION2D, 2);
+                    .partitionBy(Constants.EDGE_PARTITION2D, Constants.PARTITION_NUM);
         } else {
             graph = Graph.fromEdges(eRDD, new Vdata(), Constants.STORAGE_LEVEL, Constants.STORAGE_LEVEL,
                     Constants.VDATA_CLASS_TAG, Constants.EDATA_CLASS_TAG)
-                    .partitionBy(Constants.EDGE_PARTITION2D, 2);
+                    .partitionBy(Constants.EDGE_PARTITION2D, Constants.PARTITION_NUM);
         }
     }
 
@@ -151,7 +151,6 @@ public class Dataset implements Serializable {
      * 对全图 graph 中同 src、dst 边进行合并（选最新的边）
      */
     public void mergeEdges() {
-        Graph<Vdata, Edata> oldGraph = graph;
         graph = graph.groupEdges(new MergeEdge());
     }
 
@@ -170,12 +169,10 @@ public class Dataset implements Serializable {
      * @param dst dst ID
      */
     public void event2DSubgraph(Long src, Long dst) {
-        GraphOps<Vdata, Edata> graphOps = graph.ops();
-        graph = graphOps.pregel(2, 2, EdgeDirection.Out(),
+        graph = graph.ops().pregel(2, 2, EdgeDirection.Out(),
                 new UpdateHop(), new SendHop(src, dst), new MergeHop(), Constants.INTEGER_CLASS_TAG);
 
-        GraphOps<Vdata, Edata> graphOps2 = graph.ops();
-        graph = graphOps2.pregel(new HashMap<>(), 3, EdgeDirection.Out(),
+        graph = graph.ops().pregel(new HashMap<>(), 3, EdgeDirection.Out(),
                 new Update2DSubgraph(), new SendVfeat(), new MergeVfeat(), Constants.SUBGRAPH_MAP_CLASS_TAG);
     }
 
@@ -188,19 +185,18 @@ public class Dataset implements Serializable {
     public void encoder(Long src, Long dst) {
         graph = graph.mapVertices(new UpdateFeat(src), Constants.VDATA_CLASS_TAG, tpEquals());
 
-        GraphOps<Vdata, Edata> graphOps = graph.ops();
-        graph = graphOps.pregel(new HashMap<>(), 3, EdgeDirection.Out(),
+        graph = graph.ops().pregel(new HashMap<>(), 3, EdgeDirection.Out(),
                 new UpdateEmb(), new SendEmb(src, dst), new MergeEmb(), Constants.EMBEDDING_MAP_CLASS_TAG);
     }
 
     /**
-     * 更新二度子图的点 mailbox
+     * 更新二度子图的点 mailbox，先 send mail 再求平均
      */
     public void updateMailbox() {
-        VertexRDD<Mail> vRDD1 = graph.aggregateMessages(new SendMail(), new MergeMail(),
+        VertexRDD<Mail> vRDD = graph.aggregateMessages(new SendMail(), new MergeMail(),
                 TripletFields.All, Constants.MAIL_CLASS_TAG);
-        VertexRDD<Mail> vRDD2 = vRDD1.mapValues(new AvgMail(), Constants.MAIL_CLASS_TAG);
-        graph = graph.outerJoinVertices(vRDD2, new UpdateMailbox(),
+        vRDD = vRDD.mapValues(new AvgMail(), Constants.MAIL_CLASS_TAG);
+        graph = graph.outerJoinVertices(vRDD, new UpdateMailbox(),
                 Constants.MAIL_CLASS_TAG, Constants.VDATA_CLASS_TAG, tpEquals());
     }
 

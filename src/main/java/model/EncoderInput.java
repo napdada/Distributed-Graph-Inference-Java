@@ -42,10 +42,6 @@ public class EncoderInput implements Serializable {
      */
     private int mailDim;
 
-    public EncoderInput() {
-
-    }
-
     public EncoderInput(float[][] feat, float[][][] mail, float[] lastUpdate, float[] timestamp) {
         this.featDim = Constants.FEATURE_DIM;
         this.mailDim = Constants.FEATURE_DIM;

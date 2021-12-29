@@ -13,7 +13,6 @@ import scala.runtime.BoxedUnit;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.HashSet;
 
 /**
  * 沿着每条边给 dst 发送 feat msg
