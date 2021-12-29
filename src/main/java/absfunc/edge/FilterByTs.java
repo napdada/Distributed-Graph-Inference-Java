@@ -16,14 +16,18 @@ import java.io.Serializable;
 @Setter
 public class FilterByTs extends AbstractFunction1<Edge<Edata>, Object> implements Serializable {
 
-    private float timestamp;
+    private Long src;
+    private Long dst;
 
-    public FilterByTs(float timestamp) {
-        this.timestamp = timestamp;
+    public FilterByTs(Long src, Long dst) {
+        this.src = src;
+        this.dst = dst;
     }
 
     @Override
     public Object apply(Edge<Edata> e) {
-        return e.attr().getAccuracy() != 0;
+        boolean flag1 = e.srcId() == src && e.dstId() == dst;
+        boolean flag2 = e.srcId() == dst && e.dstId() == src;
+        return (flag1 || flag2) && e.attr().getAccuracy() != 0;
     }
 }

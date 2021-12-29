@@ -99,7 +99,7 @@ public class Main {
 //                if (num % 10 == 0) {
 //                    count += dataset.evaluate();
 //                }
-                count = dataset.evaluate(timestamp, num);
+                count += dataset.evaluate(srcID, dstID, num);
                 Constants.SPARK_INIT.unpersistAll(num);
                 System.out.println(num++);
                 System.out.println("count = " + count);

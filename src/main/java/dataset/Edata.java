@@ -80,6 +80,7 @@ public class Edata implements Serializable {
                 ", timeStamp=" + timeStamp +
                 ", logits=" + Arrays.toString(logits) +
                 ", labels=" + Arrays.toString(labels) +
+                ", accuracy=" + accuracy +
                 '}';
     }
 }

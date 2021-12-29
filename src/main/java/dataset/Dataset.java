@@ -223,8 +223,8 @@ public class Dataset implements Serializable {
         return n;
     }
 
-    public int evaluate(float timestamp, int num) {
-        RDD<Edge<Edata>> eRDD = graph.edges().filter(new FilterByTs(timestamp));
+    public int evaluate(Long src, Long dst, int num) {
+        RDD<Edge<Edata>> eRDD = graph.edges().filter(new FilterByTs(src, dst));
         eRDD.cache();
         graph.cache();
         graph.vertices().setName(num + Constants.RDD_NAME);
