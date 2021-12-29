@@ -23,7 +23,6 @@ public class Main {
             // 1. Spark 初始化
             long sparkInitTime = System.currentTimeMillis();
             JavaSparkContext sc = Constants.SC;
-            LongAccumulator accumulator = sc.sc().longAccumulator();
             log.error("----------------- Spark 初始化耗时：{} ms ----------------", System.currentTimeMillis() - sparkInitTime);
 
             // 2. 初始化数据集配置、图配置、模型配置
