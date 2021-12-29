@@ -52,6 +52,10 @@ public class Constants {
      * 累加器
      */
     public static LongAccumulator ACCUMULATOR = SC.sc().longAccumulator();
+    /**
+     * 每一轮图推理最后计算结果 RDD name
+     */
+    public static final String RDD_NAME = " final RDD";
 
     /**
      * 静态资源存储路径

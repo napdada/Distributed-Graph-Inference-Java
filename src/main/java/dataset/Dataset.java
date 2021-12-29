@@ -6,10 +6,8 @@ import absfunc.vertex.*;
 import config.Constants;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.graphx.*;
 import org.apache.spark.rdd.RDD;
-import org.apache.spark.util.LongAccumulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Tuple2;
@@ -104,11 +102,11 @@ public class Dataset implements Serializable {
         if (vRDD != null) {
             graph = Graph.apply(vRDD, eRDD, new Vdata(), Constants.STORAGE_LEVEL, Constants.STORAGE_LEVEL,
                     Constants.VDATA_CLASS_TAG, Constants.EDATA_CLASS_TAG)
-                    .partitionBy(Constants.EDGE_PARTITION2D);
+                    .partitionBy(Constants.EDGE_PARTITION2D, 2);
         } else {
             graph = Graph.fromEdges(eRDD, new Vdata(), Constants.STORAGE_LEVEL, Constants.STORAGE_LEVEL,
                     Constants.VDATA_CLASS_TAG, Constants.EDATA_CLASS_TAG)
-                    .partitionBy(Constants.EDGE_PARTITION2D);
+                    .partitionBy(Constants.EDGE_PARTITION2D, 2);
         }
     }
 
@@ -225,12 +223,13 @@ public class Dataset implements Serializable {
         return n;
     }
 
-    public int evaluate(float timestamp) {
+    public int evaluate(float timestamp, int num) {
         RDD<Edge<Edata>> eRDD = graph.edges().filter(new FilterByTs(timestamp));
         eRDD.cache();
-        int n = (int) eRDD.count();
-        eRDD.unpersist(false);
-        return n;
+        graph.cache();
+        graph.vertices().setName(num + Constants.RDD_NAME);
+        graph.edges().setName(num + Constants.RDD_NAME);
+        return (int) eRDD.count();
     }
 
     /**

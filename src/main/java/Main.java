@@ -33,8 +33,8 @@ public class Main {
             File datasetCsv = new File(Constants.DATASET_PATH);
             BufferedReader bufferedReader = new BufferedReader(new FileReader(datasetCsv));
             Dataset dataset = new Dataset();
-            RDD<Tuple2<Object, Vdata>> vertexRDD = null;
-            RDD<Edge<Edata>> edgeRDD = null;
+            RDD<Tuple2<Object, Vdata>> vRDD = null;
+            RDD<Edge<Edata>> eRDD = null;
             String lineData;
             String[] line;
             long srcID, dstID;
@@ -52,13 +52,13 @@ public class Main {
                 srcID = Long.parseLong(line[Constants.SRC_ID_INDEX]);
                 dstID = Long.parseLong(line[Constants.DST_ID_INDEX]);
                 timestamp = Float.parseFloat(line[Constants.TIMESTAMP_INDEX]);
-                if (edgeRDD == null) {
-                    edgeRDD = sc.parallelize(dataset.eventToEdge(line)).rdd();
+                if (eRDD == null) {
+                    eRDD = sc.parallelize(dataset.eventToEdge(line)).rdd();
                 } else {
-                    edgeRDD = edgeRDD.union(sc.parallelize(dataset.eventToEdge(line)).rdd());
+                    eRDD = eRDD.union(sc.parallelize(dataset.eventToEdge(line)).rdd());
                 }
                 // creatGraph
-                dataset.creatGraph(vertexRDD, edgeRDD);
+                dataset.creatGraph(vRDD, eRDD);
                 createGraphTime += System.currentTimeMillis() - tmpTime;
 
                 // mergeEdges
@@ -92,17 +92,17 @@ public class Main {
                 decoderTime += System.currentTimeMillis() - tmpTime;
 
                 tmpTime = System.currentTimeMillis();
-                edgeRDD = dataset.getGraph().edges();
-                vertexRDD = dataset.getGraph().vertices();
+                eRDD = dataset.getGraph().edges();
+                vRDD = dataset.getGraph().vertices();
                 actionTime += System.currentTimeMillis() - tmpTime;
 
 //                if (num % 10 == 0) {
 //                    count += dataset.evaluate();
 //                }
-//                count += dataset.evaluate(timestamp);
-                Constants.SPARK_INIT.unpersistAll();
+                count = dataset.evaluate(timestamp, num);
+                Constants.SPARK_INIT.unpersistAll(num);
                 System.out.println(num++);
-                System.out.println(Constants.ACCUMULATOR);
+                System.out.println("count = " + count);
             }
             bufferedReader.close();
             long endTime = System.currentTimeMillis();
@@ -120,7 +120,6 @@ public class Main {
             // 统计 acc
             tmpTime = System.currentTimeMillis();
 //            dataset.saveVertexFeat();
-            dataset.printAll();
             double accuracy = 1 - count * 1.0 / num;
             log.error("----------------- accuracy: {}  ----------------", accuracy);
             log.error("----------------- count: {}  ----------------", count);

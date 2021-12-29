@@ -24,6 +24,6 @@ public class FilterByTs extends AbstractFunction1<Edge<Edata>, Object> implement
 
     @Override
     public Object apply(Edge<Edata> e) {
-        return e.attr().getTimeStamp() == timestamp && e.attr().getAccuracy() == 0;
+        return e.attr().getAccuracy() != 0;
     }
 }

@@ -1,11 +1,15 @@
 package config;
 
+import dataset.Edata;
 import lombok.Data;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.graphx.Edge;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -43,7 +47,12 @@ public class SparkInit {
         sparkContext.setCheckpointDir(Constants.CHECKPOINT_PATH);
     }
 
-    public void unpersistAll() {
+    public void unpersistAll(int num) {
         Map<Integer, JavaRDD<?>> map = sparkContext.getPersistentRDDs();
+        for (JavaRDD<?> rdd : map.values()) {
+            if (rdd.name() == null || !rdd.name().contains(num + Constants.RDD_NAME)) {
+                rdd.unpersist();
+            }
+        }
     }
 }
