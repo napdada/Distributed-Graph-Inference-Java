@@ -22,11 +22,11 @@ public class Main {
             // 1. Spark 初始化
             long sparkInitTime = System.currentTimeMillis();
             JavaSparkContext sc = Constants.SC;
-            log.error("----------------- Spark 初始化耗时：{} ms ----------------", System.currentTimeMillis() - sparkInitTime);
+            log.warn("----------------- Spark 初始化耗时：{} ms ----------------", System.currentTimeMillis() - sparkInitTime);
 
             // 2. 初始化数据集配置、图配置、模型配置
             long initTime = System.currentTimeMillis(), createGraphTime = 0, mergeTime = 0, updateTsTime = 0, genNeighborTime = 0,
-                    inferTime = 0, updateMailboxTime = 0, decoderTime = 0, actionTime = 0, tmpTime;
+                    inferTime = 0, updateMailboxTime = 0, decoderTime = 0, evaluateTime = 0, tmpTime;
             int num = 1, count = 0;
             File datasetCsv = new File(Constants.DATASET_PATH);
             BufferedReader bufferedReader = new BufferedReader(new FileReader(datasetCsv));
@@ -37,12 +37,12 @@ public class Main {
             String[] line;
             long srcID, dstID;
             float timestamp;
-            log.error("----------------- 初始化配置耗时：{} ms ----------------", System.currentTimeMillis() - initTime);
+            log.warn("----------------- 初始化配置耗时：{} ms ----------------", System.currentTimeMillis() - initTime);
 
             // 3. 图推理
             bufferedReader.readLine();
             long startTime = System.currentTimeMillis();
-            log.error("----------------- {} 开始推理 ----------------", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(startTime));
+            log.warn("----------------- {} 开始推理 ----------------", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(startTime));
             while ((lineData = bufferedReader.readLine()) != null) {
                 // 读取一个新的事件，并与历史事件一起构图
                 tmpTime = System.currentTimeMillis();
@@ -86,43 +86,40 @@ public class Main {
 
                 // decoder
                 tmpTime = System.currentTimeMillis();
-                dataset.decoder(timestamp);
+                dataset.decoder(srcID, dstID);
                 decoderTime += System.currentTimeMillis() - tmpTime;
 
                 tmpTime = System.currentTimeMillis();
+                count += dataset.evaluate(srcID, dstID, num);
+                Constants.SPARK_INIT.unpersistAll(num);
+                evaluateTime += System.currentTimeMillis() - tmpTime;
+
+                System.out.println("num = " + num++);
+                System.out.println("count = " + count);
+
                 eRDD = dataset.getGraph().edges();
                 vRDD = dataset.getGraph().vertices();
-                actionTime += System.currentTimeMillis() - tmpTime;
-
                 if (num % 10 == 0) {
                     dataset.getGraph().cache();
                     dataset.getGraph().checkpoint();
                 }
-                count += dataset.evaluate(srcID, dstID, num);
-                Constants.SPARK_INIT.unpersistAll(num);
-                System.out.println(num++);
-                System.out.println("count = " + count);
             }
             bufferedReader.close();
             long endTime = System.currentTimeMillis();
-            log.error("----------------- {} 推理结束 ----------------", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(endTime));
-            log.error("----------------- 推理耗时: {} ms ----------------", endTime-startTime);
-            log.error("----------------- createGraphTime: {} ms, avg: {} ms ----------------", createGraphTime, createGraphTime / num);
-            log.error("----------------- mergeTime: {} ms, avg: {} ms ----------------", mergeTime, mergeTime / num);
-            log.error("----------------- updateTsTime: {} ms, avg: {} ms ----------------", updateTsTime, updateTsTime / num);
-            log.error("----------------- genNeighborTime: {} ms, avg: {} ms ----------------", genNeighborTime, genNeighborTime / num);
-            log.error("----------------- inferTime: {} ms, avg: {} ms ----------------", inferTime, inferTime / num);
-            log.error("----------------- updateMailboxTime: {} ms, avg: {} ms ----------------", updateMailboxTime, updateMailboxTime / num);
-            log.error("----------------- decoderTime: {} ms, avg: {} ms ----------------", decoderTime, decoderTime / num);
-            log.error("----------------- actionTime: {} ms, avg: {} ms ----------------", actionTime, actionTime / num);
+            log.warn("----------------- {} 推理结束 ----------------", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(endTime));
+            log.warn("----------------- 推理耗时: {} ms ----------------", endTime-startTime);
+            log.warn("----------------- createGraphTime: {} ms, avg: {} ms ----------------", createGraphTime, createGraphTime / num);
+            log.warn("----------------- mergeTime: {} ms, avg: {} ms ----------------", mergeTime, mergeTime / num);
+            log.warn("----------------- updateTsTime: {} ms, avg: {} ms ----------------", updateTsTime, updateTsTime / num);
+            log.warn("----------------- genNeighborTime: {} ms, avg: {} ms ----------------", genNeighborTime, genNeighborTime / num);
+            log.warn("----------------- inferTime: {} ms, avg: {} ms ----------------", inferTime, inferTime / num);
+            log.warn("----------------- updateMailboxTime: {} ms, avg: {} ms ----------------", updateMailboxTime, updateMailboxTime / num);
+            log.warn("----------------- decoderTime: {} ms, avg: {} ms ----------------", decoderTime, decoderTime / num);
+            log.warn("----------------- evaluateTime: {} ms, avg: {} ms ----------------", evaluateTime, evaluateTime / num);
 
-            // 统计 acc
-            tmpTime = System.currentTimeMillis();
-//            dataset.saveVertexFeat();
             double accuracy = 1 - count * 1.0 / num;
-            log.error("----------------- accuracy: {}  ----------------", accuracy);
-            log.error("----------------- count: {}  ----------------", count);
-            log.error("----------------- 统计 acc: {} ms ----------------", System.currentTimeMillis() - tmpTime);
+            log.warn("----------------- accuracy: {}  ----------------", accuracy);
+            log.warn("----------------- count: {}  ----------------", count);
         } catch (Exception e) {
             e.printStackTrace();
         }

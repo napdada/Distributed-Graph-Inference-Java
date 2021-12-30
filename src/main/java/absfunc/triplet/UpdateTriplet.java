@@ -27,12 +27,17 @@ import java.io.Serializable;
 @Setter
 public class UpdateTriplet extends AbstractFunction1<EdgeTriplet<Vdata, Edata>, Edata> implements Serializable {
     /**
-     * 事件发生时间戳
+     * src ID
      */
-    private float timestamp;
+    private Long src;
+    /**
+     * dst ID
+     */
+    private Long dst;
 
-    public UpdateTriplet(float timestamp) {
-        this.timestamp = timestamp;
+    public UpdateTriplet(Long src, Long dst) {
+        this.src = src;
+        this.dst = dst;
     }
 
     /**
@@ -42,7 +47,7 @@ public class UpdateTriplet extends AbstractFunction1<EdgeTriplet<Vdata, Edata>, 
      */
     @Override
     public Edata apply(EdgeTriplet<Vdata, Edata> e) {
-        if (e.attr().getTimeStamp() == timestamp) {
+        if ((e.srcId() == src && e.dstId() == dst) || (e.srcId() == dst && e.dstId() == src)) {
             Decoder decoder = Decoder.getInstance();
             try(NDManager manager = NDManager.newBaseManager()) {
                 NDArray src = manager.create(e.srcAttr().getFeat());

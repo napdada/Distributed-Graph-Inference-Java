@@ -206,10 +206,11 @@ public class Dataset implements Serializable {
     /**
      * 将新事件 event(src, dst) 的 embedding 进行解码（输入到 decoder）
      * 获得 logits、labels 并更新边 acc
-     * @param timestamp 边时间戳
+     * @param src src ID
+     * @param dst dst ID
      */
-    public void decoder(float timestamp) {
-        graph = graph.mapTriplets(new UpdateTriplet(timestamp), Constants.EDATA_CLASS_TAG);
+    public void decoder(Long src, Long dst) {
+        graph = graph.mapTriplets(new UpdateTriplet(src, dst), Constants.EDATA_CLASS_TAG);
     }
 
     /**
