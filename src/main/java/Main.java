@@ -21,9 +21,10 @@ public class Main {
     public static void main(String[] args) {
         try {
             // 1. Spark 初始化
-            long sparkInitTime = System.currentTimeMillis();
+            long sparkInitTime = System.currentTimeMillis(), sparkStartTime;
             JavaSparkContext sc = SC;
-            log.warn("--- Spark 初始化耗时：{} ms", System.currentTimeMillis() - sparkInitTime);
+            sparkStartTime = System.currentTimeMillis();
+            log.warn("--- Spark 初始化耗时：{} ms", sparkStartTime - sparkInitTime);
 
             // 2. 初始化数据集配置、图配置、模型配置
             BufferedReader bufferedReader = new BufferedReader(new FileReader(new File(DATASET_PATH)));
@@ -36,17 +37,19 @@ public class Main {
             RDD<Tuple2<Object, Vdata>> vRDD = null;     // vertex RDD
             RDD<Edge<Edata>> eRDD = null;               // edge RDD
             int num = 0, count = 0;                     // num：事件数、count：evaluate 正确/错误数
-            long initTime = System.currentTimeMillis(), createGraphTime = 0,
-                    mergeTime = 0, updateTsTime = 0, genNeighborTime = 0,
-                    encoderTime = 0, updateMailboxTime = 0, decoderTime = 0,
-                    evaluateTime = 0, tmpTime;          // 统计各步骤耗时
+            long initTime = sparkStartTime,
+                    createGraphTime = 0, mergeTime = 0,
+                    updateTsTime = 0, genNeighborTime = 0,
+                    encoderTime = 0, updateMailboxTime = 0,
+                    decoderTime = 0, evaluateTime = 0,
+                    tmpTime;                            // 用于统计各步骤耗时
             log.warn("--- 初始化配置耗时：{} ms", System.currentTimeMillis() - initTime);
 
-            // 3. 图推理
+            // 3. 图推理迭代
             long startTime = System.currentTimeMillis();
             log.warn("--- {} 开始推理", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(startTime));
             while ((lineData = bufferedReader.readLine()) != null) {
-                // 读取一个新的事件，并与历史事件一起构图
+                // 3.1 读取一个新的事件，并与历史事件一起构图
                 tmpTime = System.currentTimeMillis();
                 line = lineData.split(",");
                 srcID = Long.parseLong(line[SRC_ID_INDEX]);
@@ -57,46 +60,49 @@ public class Main {
                 } else {
                     eRDD = eRDD.union(sc.parallelize(graphX.eventToEdge(line)).rdd());
                 }
-                // creatGraph
+
+                // 3.2 利用增量 vRDD、eRDD 构图
                 graphX.creatGraph(vRDD, eRDD);
                 createGraphTime += System.currentTimeMillis() - tmpTime;
 
-                // mergeEdges
+                // 3.3 合并同 src、dst 边
                 tmpTime = System.currentTimeMillis();
                 graphX.mergeEdges();
                 mergeTime += System.currentTimeMillis() - tmpTime;
 
-                // updateTimestamp
+                // 3.4 更新点时间戳
                 tmpTime = System.currentTimeMillis();
                 graphX.updateTimestamp(srcID, dstID, timestamp);
                 updateTsTime += System.currentTimeMillis() - tmpTime;
 
-                // genNeighbor
+                // 3.5 生成基于新事件的二度子图
                 tmpTime = System.currentTimeMillis();
                 graphX.event2DSubgraph(srcID, dstID);
                 genNeighborTime += System.currentTimeMillis() - tmpTime;
 
-                // infer
+                // 3.6 调用 encoder 进行图推理，并更新点 feat
                 tmpTime = System.currentTimeMillis();
                 graphX.encoder(srcID, dstID);
                 encoderTime += System.currentTimeMillis() - tmpTime;
 
-                // updateMailbox
+                // 3.7 更新点的 mailbox
                 tmpTime = System.currentTimeMillis();
                 graphX.updateMailbox();
                 updateMailboxTime += System.currentTimeMillis() - tmpTime;
 
-                // decoder
+                // 3.8 调用 decoder 进行 MLP 解码，更新边 logit、label、accuracy
                 tmpTime = System.currentTimeMillis();
                 graphX.decoder(srcID, dstID);
                 decoderTime += System.currentTimeMillis() - tmpTime;
 
-                tmpTime = System.currentTimeMillis();
+                // 3.9 定期截断 RDD 血缘以防止内存溢出
                 if (num % 10 == 0) {
                     graphX.getGraph().cache();
                     graphX.getGraph().checkpoint();
                 }
 
+                // 3.10 评估结果，并释放部分内存
+                tmpTime = System.currentTimeMillis();
                 count += graphX.evaluate(srcID, dstID, num);
                 SPARK_INIT.unpersistAll(num);
                 evaluateTime += System.currentTimeMillis() - tmpTime;
@@ -106,9 +112,10 @@ public class Main {
 
                 eRDD = graphX.getGraph().edges();
                 vRDD = graphX.getGraph().vertices();
-
             }
             bufferedReader.close();
+
+            // 4. 输出结果（耗时、准确率）
             long endTime = System.currentTimeMillis();
             float n = num;
             log.warn("--- {} 推理结束", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(endTime));
