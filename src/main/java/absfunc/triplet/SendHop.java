@@ -14,7 +14,7 @@ import java.io.Serializable;
 import java.util.Collections;
 
 /**
- * GraphOps.pregel 形参中 sendMsg 的实现
+ * GraphOps.pregel 参数中 sendMsg 的实现
  * 每轮迭代将 src 的 hop - 1 发给 dst
  * @author napdada
  * @version : v 0.1 2021/12/23 10:57

@@ -8,15 +8,28 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
+ * 点特征类
  * @author napdada
  * @version : v 0.1 2021/11/29 4:23 下午
  */
 @Getter
 @Setter
 public class Vfeat implements Serializable {
+    /**
+     * 点特征
+     */
     private float[] feat;
+    /**
+     * 点 mailbox
+     */
     private ArrayList<Mail> mailbox;
+    /**
+     * 点最近更新事件
+     */
     private float lastUpdate;
+    /**
+     * 点时间戳
+     */
     private float timestamp;
 
     public Vfeat(Vdata vdata) {

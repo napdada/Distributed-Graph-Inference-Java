@@ -3,7 +3,6 @@ import ai.djl.ndarray.NDList;
 import ai.djl.ndarray.NDManager;
 import ai.djl.training.evaluator.Accuracy;
 import config.Constants;
-import config.SparkInit;
 import dataset.*;
 import model.Encoder;
 
@@ -64,37 +63,37 @@ public class Test {
         Encoder encoder = Encoder.getInstance();
 
         System.out.println("-------- 开始读取数据并构图 --------");
-        Dataset dataset = new Dataset();
-        dataset.readData();
-        dataset.printAll();
+        GraphX graphX = new GraphX();
+        graphX.readData();
+        graphX.printAll();
 
         System.out.println("--------  测试 mergeEdges --------");
-        dataset.mergeEdges();
-        dataset.printAll();
+        graphX.mergeEdges();
+        graphX.printAll();
 
         System.out.println("--------  测试 updateTimestamp --------");
-        dataset.updateTimestamp((long) 0, (long) 1, 1);
-        dataset.printAll();
+        graphX.updateTimestamp((long) 0, (long) 1, 1);
+        graphX.printAll();
 
         System.out.println("-------- 测试 genNeighbor --------");
-        dataset.event2DSubgraph((long) 0, (long) 1);
-        dataset.printAll();
+        graphX.event2DSubgraph((long) 0, (long) 1);
+        graphX.printAll();
 
         Long vertexID = 0L;
         Long vertex2ID = 1L;
         Long vertex3ID = 14L;
 
         System.out.println("--------  测试 encoder --------");
-        dataset.encoder(vertexID, vertex2ID);
-        dataset.printAll();
+        graphX.encoder(vertexID, vertex2ID);
+        graphX.printAll();
 
         System.out.println("--------  测试 decoder --------");
-        dataset.decoder(1f);
-        dataset.printAll();
+        graphX.decoder(vertexID, vertex2ID);
+        graphX.printAll();
 
         System.out.println("--------  测试 updateMailbox --------");
-        dataset.updateMailbox();
-        dataset.printVertexs();
+        graphX.updateMailbox();
+        graphX.printVertexs();
     }
     public static void main(String[] args) {
         Test test = new Test();

@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Graph.mapVertices 参数中 map 的实现
+ * 将 encoder 得到的 embedding 更新到 Vdata feat 上
  * @author napdada
  * @version : v 0.1 2021/11/29 7:45 下午
  */
@@ -29,6 +31,14 @@ public class UpdateFeat extends AbstractFunction2<Object, Vdata, Vdata> implemen
         this.src = src;
     }
 
+    /**
+     * 1. 将二度子图（2DSubgraph）转成 encoder 的输入格式
+     * 2. 加载 encoder.pt 模型进行推理，得到 embedding output
+     * 3. 将 embedding output 更新到 Vdata feat 上
+     * @param vID 点 ID
+     * @param v 点属性
+     * @return 更新后的 Vdata
+     */
     @Override
     public Vdata apply(Object vID, Vdata v) {
         if (vID.equals(src)) {
@@ -55,7 +65,6 @@ public class UpdateFeat extends AbstractFunction2<Object, Vdata, Vdata> implemen
             for (int j = 0; j < index.length; j++) {
                 embedding.put(index[j], encoderOutput.getEmbedding()[j]);
             }
-            // TODO: 可以优化成 v.setEmbedding()，但是 set 后后续的 send 里 srcAttr 依赖没变（BUG，不知道原因）
             Vdata vdata = new Vdata((Long) vID, v);
             vdata.setEmbedding(embedding);
             vdata.setFeat(embedding.get((Long) vID));

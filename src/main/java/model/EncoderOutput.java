@@ -31,10 +31,6 @@ public class EncoderOutput implements Serializable {
      */
     private float[][] embedding;
 
-    public EncoderOutput() {
-
-    }
-
     public EncoderOutput(float[][] embedding) {
         this.embedding = embedding;
     }

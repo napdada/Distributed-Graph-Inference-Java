@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.HashMap;
 
 /**
- * GraphOps.pregel 形参中 sendMsg 的实现
+ * GraphOps.pregel 参数中 sendMsg 的实现
  * 每轮迭代发送 src 的 event subgraph2D feat map 给 dst
  * @author napdada
  * @version : v 0.1 2021/12/24 21:35

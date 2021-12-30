@@ -8,7 +8,7 @@ import scala.runtime.AbstractFunction2;
 import java.io.Serializable;
 
 /**
- * GraphX.aggregateMessages() 形参中 mergeMsg 的实现，将每个 dst 节点收到的 feat msg  及 msg 个数进行合并
+ * GraphX.aggregateMessages() 参数中 mergeMsg 的实现，将每个 dst 节点收到的 feat msg  及 msg 个数进行合并
  *
  * @author napdada
  * @version : v 0.1 2021/11/16 9:24 下午

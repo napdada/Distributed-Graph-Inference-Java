@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 /**
- * GraphOps.pregel 形参中 vprog 的实现
+ * GraphOps.pregel 参数中 vprog 的实现
  * 将 pregel 每轮迭代 event subgraph2D feat map msg 更新到点上
  * @author napdada
  * @version : v 0.1 2021/12/24 21:29

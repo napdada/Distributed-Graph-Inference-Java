@@ -63,15 +63,6 @@ public class Edata implements Serializable {
         this.accuracy = accuracy;
     }
 
-    public Edata(Edata e, int accuracy) {
-        this.feat = e.getFeat();
-        this.label = e.getLabel();
-        this.timeStamp = e.getTimeStamp();
-        this.logits = e.getLogits();
-        this.labels = e.getLabels();
-        this.accuracy = accuracy;
-    }
-
     @Override
     public String toString() {
         return "Edata{" +

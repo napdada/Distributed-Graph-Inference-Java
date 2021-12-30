@@ -30,14 +30,14 @@ public class Mail implements Serializable {
     private float[] feat;
 
     public Mail() {
-        this.num = 1;
         initDim();
+        this.num = 1;
         this.feat = new float[dim];
     }
 
     public Mail(float[] feat) {
-        this.num = 1;
         initDim();
+        this.num = 1;
         this.feat = feat;
     }
 

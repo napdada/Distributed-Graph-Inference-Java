@@ -6,7 +6,7 @@ import scala.runtime.AbstractFunction2;
 import java.io.Serializable;
 
 /**
- * GraphX.groupEdges() 形参中 merge 的实现，对于同 src、dst 边选最新的边
+ * GraphX.groupEdges() 参数中 merge 的实现，对于同 src、dst 边选最新的边
  *
  * @author napdada
  * @version : v 0.1 2021/11/8 4:17 下午

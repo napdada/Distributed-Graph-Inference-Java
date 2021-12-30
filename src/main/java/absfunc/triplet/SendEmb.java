@@ -15,7 +15,7 @@ import java.util.Collections;
 import java.util.HashMap;
 
 /**
- * GraphOps.pregel 形参中 sendMsg 的实现
+ * GraphOps.pregel 参数中 sendMsg 的实现
  * 将 src 上的推理结果 embedding 发给二度子图中所有点
  * @author napdada
  * @version : v 0.1 2021/12/25 11:14

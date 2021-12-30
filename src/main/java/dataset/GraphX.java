@@ -1,7 +1,8 @@
 package dataset;
 
-import absfunc.edge.FilterByTs;
+import absfunc.edge.NegFilter;
 import absfunc.edge.MergeEdge;
+import absfunc.edge.UpdateRes;
 import absfunc.triplet.*;
 import absfunc.vertex.*;
 import config.Constants;
@@ -30,11 +31,11 @@ import java.util.List;
  */
 @Getter
 @Setter
-public class Dataset implements Serializable {
+public class GraphX implements Serializable {
     /**
      * Log
      */
-    private static final Logger logger = LoggerFactory.getLogger(Dataset.class);
+    private static final Logger logger = LoggerFactory.getLogger(GraphX.class);
     /**
      * 数据集存储路径
      */
@@ -44,7 +45,7 @@ public class Dataset implements Serializable {
      */
     private Graph<Vdata, Edata> graph;
 
-    public Dataset() {
+    public GraphX() {
         this.path = Constants.RESULT_PATH;
     }
 
@@ -210,7 +211,7 @@ public class Dataset implements Serializable {
      * @param dst dst ID
      */
     public void decoder(Long src, Long dst) {
-        graph = graph.mapTriplets(new UpdateTriplet(src, dst), Constants.EDATA_CLASS_TAG);
+        graph = graph.mapTriplets(new UpdateRes(src, dst), Constants.EDATA_CLASS_TAG);
     }
 
     /**
@@ -221,7 +222,7 @@ public class Dataset implements Serializable {
      * @return accuracy 数
      */
     public int evaluate(Long src, Long dst, int num) {
-        RDD<Edge<Edata>> eRDD = graph.edges().filter(new FilterByTs(src, dst));
+        RDD<Edge<Edata>> eRDD = graph.edges().filter(new NegFilter(src, dst));
         eRDD.cache();
         graph.cache();
         graph.vertices().setName(num + Constants.RDD_NAME);

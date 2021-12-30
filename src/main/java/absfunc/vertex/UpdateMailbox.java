@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Graph.outerJoinVertices 参数中 mapFunc 的实现
+ * 将 vertex 收到的 mail 加入其 mailbox 中
  * @author napdada
  * @version : v 0.1 2021/11/24 2:34 下午
  */

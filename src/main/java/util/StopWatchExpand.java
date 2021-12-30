@@ -5,7 +5,7 @@ import org.springframework.util.StopWatch;
 import java.text.NumberFormat;
 
 /**
- * 检测程序片段运行时间拓展
+ * 设置断点，检测程序片段运行时间工具类
  *
  * @author napdada
  * @version : v 0.1 2021/11/23 7:23 下午

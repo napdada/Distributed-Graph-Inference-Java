@@ -42,10 +42,14 @@ public class SparkInit {
         sparkContext.setCheckpointDir(Constants.CHECKPOINT_PATH);
     }
 
-    public void unpersistAll(int num) {
+    /**
+     * 从内存中释放没有被当前轮次（turn）标记的中间计算 RDD 结果
+     * @param turn 迭代轮次
+     */
+    public void unpersistAll(int turn) {
         Map<Integer, JavaRDD<?>> map = sparkContext.getPersistentRDDs();
         for (JavaRDD<?> rdd : map.values()) {
-            if (rdd.name() == null || !rdd.name().contains(num + Constants.RDD_NAME)) {
+            if (rdd.name() == null || !rdd.name().contains(turn + Constants.RDD_NAME)) {
                 rdd.unpersist();
             }
         }

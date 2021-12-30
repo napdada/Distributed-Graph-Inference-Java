@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 /**
- * GraphOps.pregel 形参中 mergeMsg 的实现
+ * GraphOps.pregel 参数中 mergeMsg 的实现
  * 将点收到的多个 embedding map 进行合并
  * @author napdada
  * @version : v 0.1 2021/12/25 11:14

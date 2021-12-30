@@ -15,9 +15,13 @@ import java.util.Arrays;
 @Getter
 @Setter
 public class DecoderOutput implements Serializable {
-
+    /**
+     * 边推理结果
+     */
     private float[] logic;
-
+    /**
+     * 边原始标签
+     */
     private float[] label;
 
     public DecoderOutput(float[] logic, float[] label) {

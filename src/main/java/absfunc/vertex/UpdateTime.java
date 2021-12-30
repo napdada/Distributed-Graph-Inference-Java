@@ -10,8 +10,8 @@ import scala.runtime.AbstractFunction2;
 import java.io.Serializable;
 
 /**
- * GraphX.outerJoinVertices() 形参中 mapFunc 的实现，更新部分点属性中的 lastUpdate 或 timestamp
- *
+ * GraphX.outerJoinVertices() 参数中 mapFunc 的实现
+ * 更新部分点属性中的 lastUpdate 或 timestamp
  * @author napdada
  * @version : v 0.1 2021/11/16 2:13 下午
  */

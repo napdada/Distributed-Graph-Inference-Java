@@ -1,4 +1,4 @@
-package absfunc.triplet;
+package absfunc.edge;
 
 import ai.djl.ndarray.NDArray;
 import ai.djl.ndarray.NDList;
@@ -18,14 +18,14 @@ import scala.runtime.AbstractFunction1;
 import java.io.Serializable;
 
 /**
- * 将 Decoder 模型的结果（logits、labels 更新到边上）
+ * 将 Decoder 模型的结果（logits、labels、accuracy 更新到边上）
  *
  * @author napdada
  * @version : v 0.1 2021/12/7 20:35
  */
 @Getter
 @Setter
-public class UpdateTriplet extends AbstractFunction1<EdgeTriplet<Vdata, Edata>, Edata> implements Serializable {
+public class UpdateRes extends AbstractFunction1<EdgeTriplet<Vdata, Edata>, Edata> implements Serializable {
     /**
      * src ID
      */
@@ -35,7 +35,7 @@ public class UpdateTriplet extends AbstractFunction1<EdgeTriplet<Vdata, Edata>, 
      */
     private Long dst;
 
-    public UpdateTriplet(Long src, Long dst) {
+    public UpdateRes(Long src, Long dst) {
         this.src = src;
         this.dst = dst;
     }

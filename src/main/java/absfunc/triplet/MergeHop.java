@@ -5,7 +5,7 @@ import scala.runtime.AbstractFunction2;
 import java.io.Serializable;
 
 /**
- * GraphOps.pregel 形参中 mergeMsg 的实现
+ * GraphOps.pregel 参数中 mergeMsg 的实现
  * 每轮迭代收到的 msg 中选择最大的 hop
  * @author napdada
  * @version : v 0.1 2021/12/23 10:57

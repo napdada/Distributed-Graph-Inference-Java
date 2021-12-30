@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 /**
- * GraphOps.pregel 形参中 mergeMsg 的实现
+ * GraphOps.pregel 参数中 mergeMsg 的实现
  * 合并每轮迭代收到的 msg map
  * @author napdada
  * @version : v 0.1 2021/12/24 21:43

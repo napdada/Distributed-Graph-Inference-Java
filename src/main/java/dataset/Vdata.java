@@ -16,6 +16,9 @@ import java.util.*;
 @Getter
 @Setter
 public class Vdata implements Serializable {
+    /**
+     * 点 ID
+     */
     private Long id;
     /**
      * 节点特征

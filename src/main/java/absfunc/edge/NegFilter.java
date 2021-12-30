@@ -9,25 +9,29 @@ import scala.runtime.AbstractFunction1;
 import java.io.Serializable;
 
 /**
+ * 过滤出最新发生事件 (src, dst) 中 accuracy 为正确/错误的边
  * @author napdada
  * @version : v 0.1 2021/12/16 20:33
  */
 @Getter
 @Setter
-public class FilterByTs extends AbstractFunction1<Edge<Edata>, Object> implements Serializable {
-
+public class NegFilter extends AbstractFunction1<Edge<Edata>, Object> implements Serializable {
+    /**
+     * src ID
+     */
     private Long src;
+    /**
+     * dst ID
+     */
     private Long dst;
 
-    public FilterByTs(Long src, Long dst) {
+    public NegFilter(Long src, Long dst) {
         this.src = src;
         this.dst = dst;
     }
 
     @Override
     public Object apply(Edge<Edata> e) {
-        boolean flag1 = e.srcId() == src && e.dstId() == dst;
-        boolean flag2 = e.srcId() == dst && e.dstId() == src;
-        return (flag1 || flag2) && e.attr().getAccuracy() != 0;
+        return ((e.srcId() == src && e.dstId() == dst) || (e.srcId() == dst && e.dstId() == src)) && e.attr().getAccuracy() != 0;
     }
 }
