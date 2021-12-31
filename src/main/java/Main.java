@@ -133,10 +133,10 @@ public class Main {
             log.warn("--- count:    {}", count);
             log.warn("--- accuracy: {}", 1 - count * 1.0 / n);
 
-//            // 5. 保存推理后全图点特征（可选）
-//            log.warn("--- 开始保存点特征");
-//            graphX.saveVertexFeat();
-//            log.warn("--- 保存 csv 结束");
+            // 5. 保存推理后全图点特征（可选）
+            log.warn("--- 开始保存点特征");
+            graphX.saveVertexFeat();
+            log.warn("--- 保存 csv 结束");
         } catch (Exception e) {
             e.printStackTrace();
         }

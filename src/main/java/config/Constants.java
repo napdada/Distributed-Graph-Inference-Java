@@ -116,7 +116,7 @@ public class Constants {
     /**
      * Pytorch 模型推理结果存储路径
      */
-    public static String RESULT_PATH = RESOURCE_PATH + "result/" + DATASET_NAME + ".csv";
+    public static String RESULT_PATH = RESOURCE_PATH + "result/" + DATASET_NAME  + "_" + TASK_NAME + ".csv";
     /**
      * Encoder 中是否使用 time embedding
      */
