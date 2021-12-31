@@ -1,3 +1,4 @@
+import config.Constants;
 import dataset.GraphX;
 import dataset.Edata;
 import dataset.Vdata;
@@ -96,7 +97,7 @@ public class Main {
                 decoderTime += System.currentTimeMillis() - tmpTime;
 
                 // 3.9 定期截断 RDD 血缘以防止内存溢出
-                if (num % 10 == 0) {
+                if (num % CHECKPOINT_FREQUENCY == 0) {
                     graphX.getGraph().cache();
                     graphX.getGraph().checkpoint();
                 }
@@ -131,6 +132,11 @@ public class Main {
             log.warn("--- num:      {}", n);
             log.warn("--- count:    {}", count);
             log.warn("--- accuracy: {}", 1 - count * 1.0 / n);
+
+//            // 5. 保存推理后全图点特征（可选）
+//            log.warn("--- 开始保存点特征");
+//            graphX.saveVertexFeat();
+//            log.warn("--- 保存 csv 结束");
         } catch (Exception e) {
             e.printStackTrace();
         }

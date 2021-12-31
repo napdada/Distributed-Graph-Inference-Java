@@ -38,7 +38,7 @@ public class Constants {
     /**
      * Spark 集群 URL（eg. "local"、"spark:master7077"）
      */
-    public static final String SPARK_MASTER = "local";
+    public static final String SPARK_MASTER = "local[4]";
     /**
      * 静态资源存储路径
      */
@@ -55,6 +55,10 @@ public class Constants {
      * checkpoint 路径
      */
     public static String CHECKPOINT_PATH = RESOURCE_PATH + "checkpoint/";
+    /**
+     * checkpoint 截断血缘的频率
+     */
+    public static int CHECKPOINT_FREQUENCY = 1;
     /**
      * Spark init
      */
