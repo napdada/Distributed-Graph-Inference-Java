@@ -7,7 +7,8 @@ import ai.djl.nn.Activation;
 import ai.djl.translate.Batchifier;
 import ai.djl.translate.Translator;
 import ai.djl.translate.TranslatorContext;
-import config.Constants;
+
+import static config.Constants.*;
 
 /**
  * 处理 Decoder 模型输入输出
@@ -38,13 +39,13 @@ public class DecoderTranslator implements Translator<DecoderInput, DecoderOutput
         NDArray embedding1 = manager.create(input.getPosEmb()), embedding2 = manager.create(input.getNegEmb());
         NDArray label1 = manager.create(input.getPosLabel()), label2 = manager.create(input.getNegLabel());
         boolean isPos = (input.getPosLabel()[0] == 0f);
-        if (!Constants.TASK_NAME.equals("LP")) {
+        if (!TASK_NAME.equals("LP")) {
             embedding2 = manager.create(0);
         }
-        embedding1.setName(isPos ? Constants.POS_EMB : Constants.NEG_EMB);
-        embedding2.setName(isPos ? Constants.NEG_EMB : Constants.POS_EMB);
-        label1.setName(isPos ? Constants.POS_LABEL : Constants.NEG_LABEL);
-        label2.setName(isPos ? Constants.NEG_LABEL : Constants.POS_LABEL);
+        embedding1.setName(isPos ? POS_EMB : NEG_EMB);
+        embedding2.setName(isPos ? NEG_EMB : POS_EMB);
+        label1.setName(isPos ? POS_LABEL : NEG_LABEL);
+        label2.setName(isPos ? NEG_LABEL : POS_LABEL);
         return new NDList(embedding1, label1, embedding2, label2);
 
     }

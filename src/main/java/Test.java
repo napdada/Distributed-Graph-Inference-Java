@@ -2,12 +2,13 @@ import ai.djl.ndarray.NDArray;
 import ai.djl.ndarray.NDList;
 import ai.djl.ndarray.NDManager;
 import ai.djl.training.evaluator.Accuracy;
-import config.Constants;
 import dataset.*;
 import model.Encoder;
 
 import java.io.*;
 import java.util.Arrays;
+
+import static config.Constants.*;
 
 /**
  * @author napdada
@@ -17,7 +18,7 @@ public class Test {
 
     public void reddit() {
         try {
-            File datasetCsv = new File(Constants.DATASET_PATH);
+            File datasetCsv = new File(DATASET_PATH);
             BufferedReader bufferedReader = new BufferedReader(new FileReader(datasetCsv));
             File result = new File("./src/main/resources/dataset/reddit_java.csv");
             BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(result));

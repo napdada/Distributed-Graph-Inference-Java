@@ -1,12 +1,13 @@
 package dataset;
 
-import config.Constants;
 import lombok.Getter;
 import lombok.Setter;
 import model.DecoderOutput;
 
 import java.io.Serializable;
 import java.util.Arrays;
+
+import static config.Constants.*;
 
 /**
  * 边属性定义
@@ -43,7 +44,7 @@ public class Edata implements Serializable {
     private int accuracy;
 
     public Edata() {
-        this.feat = new float[Constants.FEATURE_DIM];
+        this.feat = new float[FEATURE_DIM];
         this.label = 0;
         this.timeStamp = 0;
     }

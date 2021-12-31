@@ -7,9 +7,10 @@ import ai.djl.ndarray.types.Shape;
 import ai.djl.translate.Batchifier;
 import ai.djl.translate.Translator;
 import ai.djl.translate.TranslatorContext;
-import config.Constants;
 
 import java.util.Arrays;
+
+import static config.Constants.*;
 
 /**
  * @author napdada
@@ -37,13 +38,13 @@ public class EncoderTranslator implements Translator<EncoderInput, EncoderOutput
     public NDList processInput(TranslatorContext ctx, EncoderInput input) {
         NDManager manager = ctx.getNDManager();
         NDArray featArray = manager.create(input.getFeat());
-        NDArray mailArray = manager.create(input.flatMail(), new Shape(input.getMail().length, Constants.MAILBOX_LEN, input.getMailDim()));
+        NDArray mailArray = manager.create(input.flatMail(), new Shape(input.getMail().length, MAILBOX_LEN, input.getMailDim()));
         NDArray lastUpdateArray = manager.create(input.getLastUpdate());
         NDArray timestampArray = manager.create(input.getTimestamp());
-        featArray.setName(Constants.N_FEAT);
-        mailArray.setName(Constants.N_MAIL);
-        lastUpdateArray.setName(Constants.N_LS);
-        timestampArray.setName(Constants.N_TS);
+        featArray.setName(N_FEAT);
+        mailArray.setName(N_MAIL);
+        lastUpdateArray.setName(N_LS);
+        timestampArray.setName(N_TS);
         return new NDList(featArray, mailArray, lastUpdateArray, timestampArray);
     }
 
@@ -58,11 +59,11 @@ public class EncoderTranslator implements Translator<EncoderInput, EncoderOutput
     public EncoderOutput processOutput(TranslatorContext ctx, NDList list) {
         NDArray ndArray = list.get(0).duplicate();
         float[] output= ndArray.toFloatArray();
-        int num = output.length / Constants.FEATURE_DIM, from, to;
+        int num = output.length / FEATURE_DIM, from, to;
         float[][] embedding = new float[num][];
         for (int i = 0; i < num; i++) {
-            from = i * Constants.FEATURE_DIM;
-            to = from + Constants.FEATURE_DIM;
+            from = i * FEATURE_DIM;
+            to = from + FEATURE_DIM;
             embedding[i] = Arrays.copyOfRange(output, from, to);
         }
         return new EncoderOutput(embedding);

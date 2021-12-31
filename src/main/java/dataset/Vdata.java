@@ -1,11 +1,12 @@
 package dataset;
 
-import config.Constants;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.*;
+
+import static config.Constants.*;
 
 /**
  * 节点属性定义
@@ -50,7 +51,7 @@ public class Vdata implements Serializable {
     private HashMap<Long, float[]> embedding;
 
     public Vdata() {
-        this.feat = new float[Constants.FEATURE_DIM];
+        this.feat = new float[FEATURE_DIM];
         this.mailbox = new ArrayList<>();
         this.lastUpdate = 0L;
         this.eventSubgraph2DFeat = new HashMap<>();
@@ -82,7 +83,7 @@ public class Vdata implements Serializable {
 
     public Vdata(Long id, float lastUpdate, float timestamp) {
         this.id = id;
-        this.feat = new float[Constants.FEATURE_DIM];
+        this.feat = new float[FEATURE_DIM];
         this.mailbox = new ArrayList<>();
         this.lastUpdate = lastUpdate;
         this.timestamp = timestamp;
@@ -104,7 +105,7 @@ public class Vdata implements Serializable {
      *  mailbox 中 mail数量不足上限时用 0 补齐（初始时 mailbox 为空，需要补齐）
      */
     public void alignMailbox() {
-        while (mailbox.size() < Constants.MAILBOX_LEN) {
+        while (mailbox.size() < MAILBOX_LEN) {
             mailbox.add(new Mail());
         }
     }

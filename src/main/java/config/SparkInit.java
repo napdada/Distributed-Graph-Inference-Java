@@ -7,6 +7,8 @@ import org.apache.spark.api.java.JavaSparkContext;
 
 import java.util.Map;
 
+import static config.Constants.*;
+
 /**
  * Spark 初始化
  * 1. 所有 Spark 程序从 SparkContext 开始，SparkContext 的初始化需要一个 SparkConf 对象；
@@ -35,11 +37,11 @@ public class SparkInit {
     private JavaSparkContext sparkContext;
 
     public SparkInit() {
-        appName = Constants.SPARK_APP_NAME;
-        master = Constants.SPARK_MASTER;
+        appName = SPARK_APP_NAME;
+        master = SPARK_MASTER;
         sparkConf = new SparkConf().setAppName(appName).setMaster(master);
         sparkContext = new JavaSparkContext(sparkConf);
-        sparkContext.setCheckpointDir(Constants.CHECKPOINT_PATH);
+        sparkContext.setCheckpointDir(CHECKPOINT_PATH);
     }
 
     /**
@@ -49,7 +51,7 @@ public class SparkInit {
     public void unpersistAll(int turn) {
         Map<Integer, JavaRDD<?>> map = sparkContext.getPersistentRDDs();
         for (JavaRDD<?> rdd : map.values()) {
-            if (rdd.name() == null || !rdd.name().contains(turn + Constants.RDD_NAME)) {
+            if (rdd.name() == null || !rdd.name().contains(turn + RDD_NAME)) {
                 rdd.unpersist();
             }
         }

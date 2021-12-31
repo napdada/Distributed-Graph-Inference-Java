@@ -1,11 +1,12 @@
 package dataset;
 
-import config.Constants;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Arrays;
+
+import static config.Constants.*;
 
 /**
  * 点 Mail
@@ -50,11 +51,11 @@ public class Mail implements Serializable {
      * 初始化 mail 特征的维度以及是否使用 time embedding 和 position embedding
      */
     public final void initDim() {
-        dim = Constants.FEATURE_DIM;
-        if (Constants.TIME_EMBEDDING) {
+        dim = FEATURE_DIM;
+        if (TIME_EMBEDDING) {
             dim++;
         }
-        if (Constants.POSITION_EMBEDDING) {
+        if (POSITION_EMBEDDING) {
             dim++;
         }
     }

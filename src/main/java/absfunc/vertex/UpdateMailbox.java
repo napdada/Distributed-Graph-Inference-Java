@@ -1,6 +1,5 @@
 package absfunc.vertex;
 
-import config.Constants;
 import dataset.Mail;
 import dataset.Vdata;
 import scala.Option;
@@ -9,6 +8,8 @@ import scala.runtime.AbstractFunction3;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import static config.Constants.*;
 
 /**
  * Graph.outerJoinVertices 参数中 mapFunc 的实现
@@ -34,8 +35,8 @@ public class UpdateMailbox extends AbstractFunction3<Object, Vdata, Option<Mail>
      * @param newMail 新来的 mail
      */
     public void updateMailbox(List<Mail> mailbox, Mail newMail) {
-        if (mailbox.size() >= Constants.MAILBOX_LEN) {
-            mailbox.remove(Constants.MAILBOX_LEN - 1);
+        if (mailbox.size() >= MAILBOX_LEN) {
+            mailbox.remove(MAILBOX_LEN - 1);
         }
         mailbox.add(0, newMail);
     }

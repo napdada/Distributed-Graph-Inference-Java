@@ -2,7 +2,6 @@ package model;
 
 import ai.djl.Model;
 import ai.djl.inference.Predictor;
-import config.Constants;
 import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
@@ -10,6 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import static config.Constants.*;
 
 /**
  * Pytorch Decoder 模型定义
@@ -48,8 +49,8 @@ public class Decoder {
     private static Decoder decoder = new Decoder();
 
     private Decoder() {
-        modelPath = Constants.MODEL_PATH;
-        modelName = Constants.DECODER_NAME;
+        modelPath = MODEL_PATH;
+        modelName = DECODER_NAME;
         model = Model.newInstance(modelName);
         Path modelDir = Paths.get(modelPath);
         try {

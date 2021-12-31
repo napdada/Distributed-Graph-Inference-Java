@@ -5,7 +5,6 @@ import absfunc.edge.MergeEdge;
 import absfunc.edge.UpdateRes;
 import absfunc.triplet.*;
 import absfunc.vertex.*;
-import config.Constants;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.spark.graphx.*;
@@ -18,6 +17,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import static config.Constants.*;
 
 /**
  * 图数据集（csv 格式）
@@ -46,7 +47,7 @@ public class GraphX implements Serializable {
     private Graph<Vdata, Edata> graph;
 
     public GraphX() {
-        this.path = Constants.RESULT_PATH;
+        this.path = RESULT_PATH;
     }
 
     /**
@@ -67,7 +68,7 @@ public class GraphX implements Serializable {
             bufferedReader.close();
 
             // 2. 构图
-            creatGraph(null, Constants.SC.parallelize(edgeList).rdd());
+            creatGraph(null, SC.parallelize(edgeList).rdd());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -79,19 +80,19 @@ public class GraphX implements Serializable {
      * @return ArrayList<Edge<Edata>> 边 List
      */
     public ArrayList<Edge<Edata>> eventToEdge(String[] event) {
-        long srcID = Long.parseLong(event[Constants.SRC_ID_INDEX]);
-        long dstID = Long.parseLong(event[Constants.DST_ID_INDEX]);
-        float timestamp = Float.parseFloat(event[Constants.TIMESTAMP_INDEX]);
-        int label = Integer.parseInt(event[Constants.LABEL_INDEX]);
-        float[] feat = new float[Constants.FEATURE_DIM];
-        for (int i = 0; i < Constants.FEATURE_DIM; i++) {
-            feat[i] = Float.parseFloat(event[i +Constants.FEATURE_INDEX]);
+        long srcID = Long.parseLong(event[SRC_ID_INDEX]);
+        long dstID = Long.parseLong(event[DST_ID_INDEX]);
+        float timestamp = Float.parseFloat(event[TIMESTAMP_INDEX]);
+        int label = Integer.parseInt(event[LABEL_INDEX]);
+        float[] feat = new float[FEATURE_DIM];
+        for (int i = 0; i < FEATURE_DIM; i++) {
+            feat[i] = Float.parseFloat(event[i + FEATURE_INDEX]);
         }
         Edata edata = new Edata(feat, label, timestamp);
         ArrayList<Edge<Edata>> edgeList = new ArrayList<>();
         edgeList.add(new Edge<>(srcID, dstID, edata));
         // 无向图需要双向边
-        if (!Constants.HAVE_DIRECTION){
+        if (!HAVE_DIRECTION){
             edgeList.add(new Edge<>(dstID, srcID, edata));
         }
         return edgeList;
@@ -104,13 +105,13 @@ public class GraphX implements Serializable {
      */
     public void creatGraph(RDD<Tuple2<Object, Vdata>> vRDD, RDD<Edge<Edata>> eRDD) {
         if (vRDD != null) {
-            graph = Graph.apply(vRDD, eRDD, new Vdata(), Constants.STORAGE_LEVEL, Constants.STORAGE_LEVEL,
-                    Constants.VDATA_CLASS_TAG, Constants.EDATA_CLASS_TAG)
-                    .partitionBy(Constants.EDGE_PARTITION2D, Constants.PARTITION_NUM);
+            graph = Graph.apply(vRDD, eRDD, new Vdata(), STORAGE_LEVEL, STORAGE_LEVEL,
+                    VDATA_CLASS_TAG, EDATA_CLASS_TAG)
+                    .partitionBy(EDGE_PARTITION2D, PARTITION_NUM);
         } else {
-            graph = Graph.fromEdges(eRDD, new Vdata(), Constants.STORAGE_LEVEL, Constants.STORAGE_LEVEL,
-                    Constants.VDATA_CLASS_TAG, Constants.EDATA_CLASS_TAG)
-                    .partitionBy(Constants.EDGE_PARTITION2D, Constants.PARTITION_NUM);
+            graph = Graph.fromEdges(eRDD, new Vdata(), STORAGE_LEVEL, STORAGE_LEVEL,
+                    VDATA_CLASS_TAG, EDATA_CLASS_TAG)
+                    .partitionBy(EDGE_PARTITION2D, PARTITION_NUM);
         }
     }
 
@@ -146,9 +147,9 @@ public class GraphX implements Serializable {
         l.add(new Edge<>(8, 10, edata));l.add(new Edge<>(10, 8, edata));
         l.add(new Edge<>(9, 10, edata));l.add(new Edge<>(10, 9, edata));
         l.add(new Edge<>(11, 9, edata));l.add(new Edge<>(9, 11, edata));
-        return Graph.apply(Constants.SC.parallelize(v).rdd(), Constants.SC.parallelize(l).rdd(), new Vdata(), Constants.STORAGE_LEVEL, Constants.STORAGE_LEVEL,
-                Constants.VDATA_CLASS_TAG, Constants.EDATA_CLASS_TAG)
-                .partitionBy(Constants.EDGE_PARTITION2D);
+        return Graph.apply(SC.parallelize(v).rdd(), SC.parallelize(l).rdd(), new Vdata(), STORAGE_LEVEL, STORAGE_LEVEL,
+                VDATA_CLASS_TAG, EDATA_CLASS_TAG)
+                .partitionBy(EDGE_PARTITION2D);
     }
 
     /**
@@ -162,7 +163,7 @@ public class GraphX implements Serializable {
      * 更新全图点的 timestamp 为最新相关事件的 timestamp
      */
     public void updateTimestamp(Long src, Long dst, float timestamp) {
-        graph = graph.mapVertices(new UpdateTime(src, dst, timestamp), Constants.VDATA_CLASS_TAG, tpEquals());
+        graph = graph.mapVertices(new UpdateTime(src, dst, timestamp), VDATA_CLASS_TAG, tpEquals());
     }
 
     /**
@@ -174,10 +175,10 @@ public class GraphX implements Serializable {
      */
     public void event2DSubgraph(Long src, Long dst) {
         graph = graph.ops().pregel(2, 2, EdgeDirection.Out(),
-                new UpdateHop(), new SendHop(src, dst), new MergeHop(), Constants.INTEGER_CLASS_TAG);
+                new UpdateHop(), new SendHop(src, dst), new MergeHop(), INTEGER_CLASS_TAG);
 
         graph = graph.ops().pregel(new HashMap<>(), 3, EdgeDirection.Out(),
-                new Update2DSubgraph(), new SendVfeat(), new MergeVfeat(), Constants.SUBGRAPH_MAP_CLASS_TAG);
+                new Update2DSubgraph(), new SendVfeat(), new MergeVfeat(), SUBGRAPH_MAP_CLASS_TAG);
     }
 
     /**
@@ -187,10 +188,10 @@ public class GraphX implements Serializable {
      * @param dst dst ID
      */
     public void encoder(Long src, Long dst) {
-        graph = graph.mapVertices(new UpdateFeat(src), Constants.VDATA_CLASS_TAG, tpEquals());
+        graph = graph.mapVertices(new UpdateFeat(src), VDATA_CLASS_TAG, tpEquals());
 
         graph = graph.ops().pregel(new HashMap<>(), 3, EdgeDirection.Out(),
-                new UpdateEmb(), new SendEmb(src, dst), new MergeEmb(), Constants.EMBEDDING_MAP_CLASS_TAG);
+                new UpdateEmb(), new SendEmb(src, dst), new MergeEmb(), EMBEDDING_MAP_CLASS_TAG);
     }
 
     /**
@@ -198,10 +199,10 @@ public class GraphX implements Serializable {
      */
     public void updateMailbox() {
         VertexRDD<Mail> vRDD = graph.aggregateMessages(new SendMail(), new MergeMail(),
-                TripletFields.All, Constants.MAIL_CLASS_TAG);
-        vRDD = vRDD.mapValues(new AvgMail(), Constants.MAIL_CLASS_TAG);
+                TripletFields.All, MAIL_CLASS_TAG);
+        vRDD = vRDD.mapValues(new AvgMail(), MAIL_CLASS_TAG);
         graph = graph.outerJoinVertices(vRDD, new UpdateMailbox(),
-                Constants.MAIL_CLASS_TAG, Constants.VDATA_CLASS_TAG, tpEquals());
+                MAIL_CLASS_TAG, VDATA_CLASS_TAG, tpEquals());
     }
 
     /**
@@ -211,7 +212,7 @@ public class GraphX implements Serializable {
      * @param dst dst ID
      */
     public void decoder(Long src, Long dst) {
-        graph = graph.mapTriplets(new UpdateRes(src, dst), Constants.EDATA_CLASS_TAG);
+        graph = graph.mapTriplets(new UpdateRes(src, dst), EDATA_CLASS_TAG);
     }
 
     /**
@@ -225,8 +226,8 @@ public class GraphX implements Serializable {
         RDD<Edge<Edata>> eRDD = graph.edges().filter(new NegFilter(src, dst));
         eRDD.cache();
         graph.cache();
-        graph.vertices().setName(num + Constants.RDD_NAME);
-        graph.edges().setName(num + Constants.RDD_NAME);
+        graph.vertices().setName(num + RDD_NAME);
+        graph.edges().setName(num + RDD_NAME);
         return (int) eRDD.count();
     }
 
@@ -234,11 +235,11 @@ public class GraphX implements Serializable {
      * 将 Pytorch 模型推理后更新的点特征进行存储
      */
     public void saveVertexFeat() throws IOException {
-        File resCsv = new File(Constants.RESULT_PATH);
+        File resCsv = new File(RESULT_PATH);
         BufferedWriter writerRes = new BufferedWriter(new FileWriter(resCsv));
         List<Tuple2<Object, Vdata>> vertexList = graph.vertices().toJavaRDD().collect();
         try {
-            writerRes.write(Constants.RESULT_TITLE);
+            writerRes.write(RESULT_TITLE);
             for (Tuple2<Object, Vdata> v : vertexList) {
                 writerRes.newLine();
                 writerRes.write(v._1 + ",");

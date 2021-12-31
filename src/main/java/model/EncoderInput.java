@@ -1,12 +1,13 @@
 package model;
 
-import config.Constants;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang.ArrayUtils;
 
 import java.io.Serializable;
 import java.util.Arrays;
+
+import static config.Constants.*;
 
 /**
  * Pytorch Encoder 模型自定义输入
@@ -43,12 +44,12 @@ public class EncoderInput implements Serializable {
     private int mailDim;
 
     public EncoderInput(float[][] feat, float[][][] mail, float[] lastUpdate, float[] timestamp) {
-        this.featDim = Constants.FEATURE_DIM;
-        this.mailDim = Constants.FEATURE_DIM;
-        if (Constants.TIME_EMBEDDING) {
+        this.featDim = FEATURE_DIM;
+        this.mailDim = FEATURE_DIM;
+        if (TIME_EMBEDDING) {
             mailDim++;
         }
-        if (Constants.POSITION_EMBEDDING) {
+        if (POSITION_EMBEDDING) {
             mailDim++;
         }
         this.feat = feat;

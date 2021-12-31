@@ -1,11 +1,12 @@
 package dataset;
 
-import config.Constants;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+
+import static config.Constants.*;
 
 /**
  * 点特征类
@@ -43,7 +44,7 @@ public class Vfeat implements Serializable {
      *  mailbox 中 mail数量不足上限时用 0 补齐（初始时 mailbox 为空，需要补齐）
      */
     public void alignMailbox() {
-        while (mailbox.size() < Constants.MAILBOX_LEN) {
+        while (mailbox.size() < MAILBOX_LEN) {
             mailbox.add(new Mail());
         }
     }
@@ -54,7 +55,7 @@ public class Vfeat implements Serializable {
      */
     public float[][] mailboxToArray() {
         int i = 0;
-        float[][] mails = new float[Constants.MAILBOX_LEN][];
+        float[][] mails = new float[MAILBOX_LEN][];
         alignMailbox();
         for (Mail mail : mailbox) {
             mails[i++] = mail.getFeat();

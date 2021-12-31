@@ -4,7 +4,6 @@ import ai.djl.ndarray.NDArray;
 import ai.djl.ndarray.NDList;
 import ai.djl.ndarray.NDManager;
 import ai.djl.training.evaluator.Accuracy;
-import config.Constants;
 import dataset.Edata;
 import dataset.Vdata;
 import lombok.Getter;
@@ -16,6 +15,8 @@ import org.apache.spark.graphx.EdgeTriplet;
 import scala.runtime.AbstractFunction1;
 
 import java.io.Serializable;
+
+import static config.Constants.*;
 
 /**
  * 将 Decoder 模型的结果（logits、labels、accuracy 更新到边上）
@@ -52,11 +53,11 @@ public class UpdateRes extends AbstractFunction1<EdgeTriplet<Vdata, Edata>, Edat
             try(NDManager manager = NDManager.newBaseManager()) {
                 NDArray src = manager.create(e.srcAttr().getFeat());
                 NDArray dst = manager.create(e.dstAttr().getFeat());
-                NDArray neg = manager.create(new float[Constants.FEATURE_DIM]);
+                NDArray neg = manager.create(new float[FEATURE_DIM]);
                 float[][] posEmb = new float[1][], negEmb = {src.concat(neg).toFloatArray()};
                 float[] posLabel = {e.attr().getLabel()}, negLabel = {0f};
 
-                switch (Constants.TASK_NAME) {
+                switch (TASK_NAME) {
                     case "LP":
                         posEmb[0] = src.concat(dst).toFloatArray();
                         break;
