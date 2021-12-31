@@ -1,12 +1,11 @@
 package config;
 
-import dataset.Edata;
-import dataset.Mail;
-import dataset.Vdata;
-import dataset.Vfeat;
+import dataset.*;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.graphx.PartitionStrategy;
 import org.apache.spark.storage.StorageLevel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.reflect.ClassTag;
 import scala.reflect.ClassTag$;
 
@@ -19,22 +18,36 @@ import java.util.HashMap;
  * @version : v 0.1 2021/11/3 2:44 下午
  */
 public class Constants {
-
+    /**
+     * 设置执行参数（静态资源存储路径、数据集名称、任务名称、血缘截断频率）
+     * @param args 命令行参数
+     */
     public Constants(String[] args) {
-        RESOURCE_PATH = args[0];
-        DATASET_NAME = args[1];
-        DATASET_PATH = RESOURCE_PATH + "dataset/" + DATASET_NAME + ".csv";
-        MODEL_PATH = RESOURCE_PATH + "model";
-        TASK_NAME = args[2];
-        ENCODER_NAME = "Encoder_" + DATASET_NAME + "_" + TASK_NAME;
-        DECODER_NAME = "Decoder_" + DATASET_NAME + "_" + TASK_NAME;
-        RESULT_PATH = RESOURCE_PATH + "result/" + DATASET_NAME + ".csv";
+        try {
+            RESOURCE_PATH = args[0];
+            DATASET_NAME = args[1];
+            DATASET_PATH = RESOURCE_PATH + "dataset/" + DATASET_NAME + ".csv";
+            MODEL_PATH = RESOURCE_PATH + "model";
+            TASK_NAME = args[2];
+            ENCODER_NAME = "Encoder_" + DATASET_NAME + "_" + TASK_NAME;
+            DECODER_NAME = "Decoder_" + DATASET_NAME + "_" + TASK_NAME;
+            RESULT_PATH = RESOURCE_PATH + "result/" + DATASET_NAME + ".csv";
+            CHECKPOINT_FREQUENCY = Integer.parseInt(args[3]);
+        } catch (Exception e) {
+            logger.error("args 参数配置错误！请正确配置参数！");
+            logger.error("args 参数格式样例: spark.jar [./resources/path] [wikipedia/reddit] [LP/NC/EC] [1/10]");
+        }
+
     }
 
     /**
+     * Log
+     */
+    private static final Logger logger = LoggerFactory.getLogger(Constants.class);
+    /**
      * Spark 应用名
      */
-    public static final String SPARK_APP_NAME = "spark";
+    public static final String SPARK_APP_NAME = "Distributed Graph Inference";
     /**
      * Spark 集群 URL（eg. "local"、"spark:master7077"）
      */
@@ -56,7 +69,7 @@ public class Constants {
      */
     public static String CHECKPOINT_PATH = RESOURCE_PATH + "checkpoint/";
     /**
-     * checkpoint 截断血缘的频率
+     * checkpoint 截断 RDD 血缘的频率（eg. 1：每一条事件推理后截断 RDD 血缘，数字越大越容易内存溢出）
      */
     public static int CHECKPOINT_FREQUENCY = 1;
     /**
@@ -100,7 +113,7 @@ public class Constants {
     /**
      * Pytorch 模型任务（LP、EC、NC）
      */
-    public static String TASK_NAME = "EC";
+    public static String TASK_NAME = "LP";
     /**
      * Pytorch Encoder 模型名称
      */
@@ -136,8 +149,9 @@ public class Constants {
     public static final String NEG_EMB = "neg_emb";
     public static final String POS_LABEL = "pos_label";
     public static final String NEG_LABEL = "neg_label";
+
     /**
-     * 每一轮图推理最后计算结果 RDD name
+     * GraphX 每一轮图推理最后计算结果 RDD name
      */
     public static final String RDD_NAME = " final RDD";
     /**
@@ -155,7 +169,7 @@ public class Constants {
     /**
      * GraphX 分区数量
      */
-    public static final int PARTITION_NUM = 2;
+    public static final int PARTITION_NUM = 4;
     /**
      * mailbox 的最大容量
      */
@@ -193,4 +207,22 @@ public class Constants {
      * HashMap<Long, float[]> embedding map tag
      */
     public static final ClassTag<HashMap<Long, float[]>> EMBEDDING_MAP_CLASS_TAG = ClassTag$.MODULE$.apply(HashMap.class);
+
+    /**
+     * 日期格式
+     */
+    public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
+    @Override
+    public String toString() {
+        return "Constants{" +
+                "Spark 应用名 = " + SPARK_APP_NAME +
+                ", Spark 集群 = " + SPARK_MASTER +
+                ", 静态资源存储路径 = " + RESOURCE_PATH +
+                ", 数据集存储路径 = " + DATASET_PATH +
+                ", 数据集名称 = " + DATASET_NAME +
+                ", Pytorch 模型任务 = " + TASK_NAME +
+                ", 截断血缘的频率 = " + CHECKPOINT_FREQUENCY +
+                '}';
+    }
 }

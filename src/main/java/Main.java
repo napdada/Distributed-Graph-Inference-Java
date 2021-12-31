@@ -23,6 +23,8 @@ public class Main {
         try {
             // 1. Spark 初始化
             long sparkInitTime = System.currentTimeMillis(), sparkStartTime;
+            Constants constants = new Constants(args);
+            log.warn("--- " + constants.toString());
             JavaSparkContext sc = SC;
             sparkStartTime = System.currentTimeMillis();
             log.warn("--- Spark 初始化耗时：{} ms", sparkStartTime - sparkInitTime);
@@ -48,7 +50,7 @@ public class Main {
 
             // 3. 图推理迭代
             long startTime = System.currentTimeMillis();
-            log.warn("--- {} 开始推理", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(startTime));
+            log.warn("--- {} 开始推理", new SimpleDateFormat(DATE_FORMAT).format(startTime));
             while ((lineData = bufferedReader.readLine()) != null) {
                 // 3.1 读取一个新的事件，并与历史事件一起构图
                 tmpTime = System.currentTimeMillis();
@@ -119,8 +121,8 @@ public class Main {
             // 4. 输出结果（耗时、准确率）
             long endTime = System.currentTimeMillis();
             float n = num;
-            log.warn("--- {} 推理结束", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(endTime));
-            log.warn("--- total:    {} ms", endTime-startTime);
+            log.warn("--- {} 推理结束", new SimpleDateFormat(DATE_FORMAT).format(endTime));
+            log.warn("--- total:    {} ms", endTime - startTime);
             log.warn("--- create:   {} ms, avg: {} ms", createGraphTime, createGraphTime / n);
             log.warn("--- merge:    {} ms, avg: {} ms", mergeTime, mergeTime / n);
             log.warn("--- updateTs: {} ms, avg: {} ms", updateTsTime, updateTsTime / n);
@@ -134,9 +136,9 @@ public class Main {
             log.warn("--- accuracy: {}", 1 - count * 1.0 / n);
 
             // 5. 保存推理后全图点特征（可选）
-            log.warn("--- 开始保存点特征");
+            log.warn("--- {} 开始保存点特征", new SimpleDateFormat(DATE_FORMAT).format(System.currentTimeMillis()));
             graphX.saveVertexFeat();
-            log.warn("--- 保存 csv 结束");
+            log.warn("--- {} 保存 csv 结束", new SimpleDateFormat(DATE_FORMAT).format(System.currentTimeMillis()));
         } catch (Exception e) {
             e.printStackTrace();
         }
