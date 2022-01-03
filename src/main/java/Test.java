@@ -102,8 +102,8 @@ public class Test {
 
 //        test.test();
         try(NDManager manager = NDManager.newBaseManager()) {
-            float[] logit = {0,0,0,0, (float) 2};
-            float[] label = {0,0,0,0,0};
+            float[] logit = {(float) 0.4, (float) 0.4, 0, 0, 0};
+            float[] label = {0, 1, 0, 0, 0};
             NDArray logits = manager.create(logit);
             NDArray labels = manager.create(label);
             Accuracy accuracy = new Accuracy();

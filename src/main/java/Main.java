@@ -133,7 +133,7 @@ public class Main {
             log.warn("--- evaluate: {} ms, avg: {} ms", evaluateTime, evaluateTime / n);
             log.warn("--- num:      {}", n);
             log.warn("--- count:    {}", count);
-            log.warn("--- accuracy: {}", 1 - count * 1.0 / n);
+            log.warn("--- accuracy: {}", 1 - (count * 1.0) / (n * 2));
 
             // 5. 保存推理后全图点特征（可选）
             log.warn("--- {} 开始保存点特征", new SimpleDateFormat(DATE_FORMAT).format(System.currentTimeMillis()));

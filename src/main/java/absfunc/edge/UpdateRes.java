@@ -74,7 +74,11 @@ public class UpdateRes extends AbstractFunction1<EdgeTriplet<Vdata, Edata>, Edat
                 }
                 DecoderInput decoderInput = new DecoderInput(posEmb, posLabel, negEmb, negLabel);
                 DecoderOutput decoderOutput = decoder.infer(decoderInput);
-
+                float[] logit = decoderOutput.getLogic();
+                if (TASK_NAME.equals("LP")) {
+                    logit[0] = logit[0] > 0.5 ? 1 : 0;
+                    logit[1] = logit[1] > 0.5 ? 1 : 0;
+                }
                 NDArray logits = manager.create(decoderOutput.getLogic());
                 NDArray labels = manager.create(decoderOutput.getLabel());
                 Accuracy accuracy = new Accuracy();

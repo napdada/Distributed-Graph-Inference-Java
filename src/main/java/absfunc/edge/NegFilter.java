@@ -32,6 +32,6 @@ public class NegFilter extends AbstractFunction1<Edge<Edata>, Object> implements
 
     @Override
     public Object apply(Edge<Edata> e) {
-        return ((e.srcId() == src && e.dstId() == dst) || (e.srcId() == dst && e.dstId() == src)) && e.attr().getAccuracy() != 0;
+        return ((e.srcId() == src && e.dstId() == dst) || (e.srcId() == dst && e.dstId() == src)) && e.attr().getAccuracy() == 0;
     }
 }
