@@ -5,7 +5,6 @@ import ai.djl.ndarray.NDList;
 import ai.djl.ndarray.NDManager;
 import ai.djl.training.evaluator.Accuracy;
 import dataset.Edata;
-import dataset.GraphX;
 import dataset.Vdata;
 import lombok.Getter;
 import lombok.Setter;
@@ -85,6 +84,8 @@ public class UpdateRes extends AbstractFunction1<EdgeTriplet<Vdata, Edata>, Edat
                 if (TASK_NAME.equals("LP")) {
                     logit[0] = logit[0] > 0.5 ? 1 : 0;
                     logit[1] = logit[1] > 0.5 ? 1 : 0;
+                } else {
+                    logit[0] = logit[0] > 0.5 ? 0 : 1;
                 }
                 NDArray logits = manager.create(decoderOutput.getLogic());
                 NDArray labels = manager.create(decoderOutput.getLabel());

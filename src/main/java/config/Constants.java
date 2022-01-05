@@ -19,7 +19,7 @@ import java.util.HashMap;
  */
 public class Constants {
     /**
-     * 设置执行参数（静态资源存储路径、数据集名称、任务名称、血缘截断频率）
+     * 设置执行参数（静态资源存储路径、数据集名称、任务名称、血缘截断频率、推理事件最大个数）
      * @param args 命令行参数
      */
     public Constants(String[] args) {
@@ -36,7 +36,7 @@ public class Constants {
             MAX_EVENT_NUM = Integer.parseInt(args[4]);
         } catch (Exception e) {
             logger.error("args 参数配置错误！请正确配置参数！");
-            logger.error("args 参数格式样例: spark.jar [./resources/path] [wikipedia/reddit] [LP/NC/EC] [1/10]");
+            logger.error("args 参数格式样例: spark.jar [./resources/path] [wikipedia/reddit] [LP/NC/EC] [1/10] [1000]");
         }
 
     }
