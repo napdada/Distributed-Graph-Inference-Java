@@ -115,6 +115,9 @@ public class Main {
 
                 eRDD = graphX.getGraph().edges();
                 vRDD = graphX.getGraph().vertices();
+                if (num == MAX_EVENT_NUM) {
+                    break;
+                }
             }
             bufferedReader.close();
 
@@ -131,8 +134,8 @@ public class Main {
             log.warn("--- mailbox:  {} ms, avg: {} ms", updateMailboxTime, updateMailboxTime / n);
             log.warn("--- decoder:  {} ms, avg: {} ms", decoderTime, decoderTime / n);
             log.warn("--- evaluate: {} ms, avg: {} ms", evaluateTime, evaluateTime / n);
-            log.warn("--- num:      {}", n);
-            log.warn("--- count:    {}", count);
+            log.warn("--- event num:      {}", n);
+            log.warn("--- neg count:    {}", count);
             log.warn("--- accuracy: {}", 1 - (count * 1.0) / (n * 2));
 
             // 5. 保存推理后全图点特征（可选）

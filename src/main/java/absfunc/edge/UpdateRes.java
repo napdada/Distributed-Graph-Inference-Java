@@ -5,6 +5,7 @@ import ai.djl.ndarray.NDList;
 import ai.djl.ndarray.NDManager;
 import ai.djl.training.evaluator.Accuracy;
 import dataset.Edata;
+import dataset.GraphX;
 import dataset.Vdata;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,6 +13,8 @@ import model.Decoder;
 import model.DecoderInput;
 import model.DecoderOutput;
 import org.apache.spark.graphx.EdgeTriplet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.runtime.AbstractFunction1;
 
 import java.io.Serializable;
@@ -27,6 +30,10 @@ import static config.Constants.*;
 @Getter
 @Setter
 public class UpdateRes extends AbstractFunction1<EdgeTriplet<Vdata, Edata>, Edata> implements Serializable {
+    /**
+     * Log
+     */
+    private static final Logger logger = LoggerFactory.getLogger(UpdateRes.class);
     /**
      * src ID
      */
@@ -69,7 +76,7 @@ public class UpdateRes extends AbstractFunction1<EdgeTriplet<Vdata, Edata>, Edat
                         posEmb[0] = src.toFloatArray();
                         break;
                     default:
-                        System.out.println("参数 TASK_NAME 配置错误！");
+                        logger.error("参数 TASK_NAME 配置错误！");
                         return e.attr();
                 }
                 DecoderInput decoderInput = new DecoderInput(posEmb, posLabel, negEmb, negLabel);

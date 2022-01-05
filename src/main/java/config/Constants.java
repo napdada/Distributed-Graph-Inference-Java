@@ -33,6 +33,7 @@ public class Constants {
             DECODER_NAME = "Decoder_" + DATASET_NAME + "_" + TASK_NAME;
             RESULT_PATH = RESOURCE_PATH + "result/" + DATASET_NAME + ".csv";
             CHECKPOINT_FREQUENCY = Integer.parseInt(args[3]);
+            MAX_EVENT_NUM = Integer.parseInt(args[4]);
         } catch (Exception e) {
             logger.error("args 参数配置错误！请正确配置参数！");
             logger.error("args 参数格式样例: spark.jar [./resources/path] [wikipedia/reddit] [LP/NC/EC] [1/10]");
@@ -72,6 +73,10 @@ public class Constants {
      * checkpoint 截断 RDD 血缘的频率（eg. 1：每一条事件推理后截断 RDD 血缘，数字越大越容易内存溢出）
      */
     public static int CHECKPOINT_FREQUENCY = 1;
+    /**
+     * 推理事件最大个数
+     */
+    public static int MAX_EVENT_NUM = 1000;
     /**
      * Spark init
      */
@@ -219,10 +224,10 @@ public class Constants {
                 "Spark 应用名 = " + SPARK_APP_NAME +
                 ", Spark 集群 = " + SPARK_MASTER +
                 ", 静态资源存储路径 = " + RESOURCE_PATH +
-                ", 数据集存储路径 = " + DATASET_PATH +
                 ", 数据集名称 = " + DATASET_NAME +
                 ", Pytorch 模型任务 = " + TASK_NAME +
                 ", 截断血缘的频率 = " + CHECKPOINT_FREQUENCY +
+                ", 推理事件最大个数 = " + MAX_EVENT_NUM +
                 '}';
     }
 }
