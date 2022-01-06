@@ -62,10 +62,6 @@ public class Constants {
      */
     public static String DATASET_NAME = "wikipedia";
     /**
-     * 数据集存储路径
-     */
-    public static String DATASET_PATH = RESOURCE_PATH + "dataset/" + DATASET_NAME + ".csv";
-    /**
      * checkpoint 路径
      */
     public static String CHECKPOINT_PATH = RESOURCE_PATH + "checkpoint/";
@@ -86,6 +82,10 @@ public class Constants {
      */
     public static final JavaSparkContext SC = SPARK_INIT.getSparkContext();
 
+    /**
+     * 数据集存储路径
+     */
+    public static String DATASET_PATH = RESOURCE_PATH + "dataset/" + DATASET_NAME + ".csv";
     /**
      * 点边特征维度
      */

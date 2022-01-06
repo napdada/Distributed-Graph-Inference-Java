@@ -19,7 +19,21 @@ import static config.Constants.*;
  */
 @Slf4j
 public class Main {
+
     public static void main(String[] args) {
+        int i = 0, experimentNum = 10;
+        while (i < experimentNum) {
+            Main main = new Main();
+            main.graphInfer(args);
+            i++;
+        }
+    }
+
+    /**
+     * 分布式图推理
+     * @param args 参数
+     */
+    public void graphInfer(String[] args) {
         try {
             // 1. Spark 初始化
             long sparkInitTime = System.currentTimeMillis(), sparkStartTime;
@@ -120,12 +134,13 @@ public class Main {
                 }
             }
             bufferedReader.close();
+            sc.close();
 
             // 4. 输出结果（耗时、准确率）
             long endTime = System.currentTimeMillis();
             float n = num;
             log.warn("--- {} 推理结束", new SimpleDateFormat(DATE_FORMAT).format(endTime));
-            log.warn("--- total:    {} ms", endTime - startTime);
+            log.warn("--- total:    {} ms, avg: {} ms", endTime - startTime, (endTime - startTime) / n);
             log.warn("--- create:   {} ms, avg: {} ms", createGraphTime, createGraphTime / n);
             log.warn("--- merge:    {} ms, avg: {} ms", mergeTime, mergeTime / n);
             log.warn("--- updateTs: {} ms, avg: {} ms", updateTsTime, updateTsTime / n);
@@ -140,7 +155,7 @@ public class Main {
 
             // 5. 保存推理后全图点特征（可选）
             log.warn("--- {} 开始保存点特征", new SimpleDateFormat(DATE_FORMAT).format(System.currentTimeMillis()));
-            graphX.saveVertexFeat();
+//            graphX.saveVertexFeat();
             log.warn("--- {} 保存 csv 结束", new SimpleDateFormat(DATE_FORMAT).format(System.currentTimeMillis()));
         } catch (Exception e) {
             e.printStackTrace();
