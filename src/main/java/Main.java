@@ -134,7 +134,6 @@ public class Main {
                 }
             }
             bufferedReader.close();
-            sc.close();
 
             // 4. 输出结果（耗时、准确率）
             long endTime = System.currentTimeMillis();
