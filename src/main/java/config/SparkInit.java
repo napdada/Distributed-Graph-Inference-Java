@@ -4,6 +4,8 @@ import lombok.Data;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -19,6 +21,10 @@ import static config.Constants.*;
  */
 @Data
 public class SparkInit {
+    /**
+     * Log
+     */
+    private static final Logger logger = LoggerFactory.getLogger(SparkInit.class);
     /**x
      * 应用名
      */
@@ -37,11 +43,17 @@ public class SparkInit {
     private JavaSparkContext sparkContext;
 
     public SparkInit() {
-        appName = SPARK_APP_NAME;
-        master = SPARK_MASTER;
-        sparkConf = new SparkConf().setAppName(appName).setMaster(master);
-        sparkContext = new JavaSparkContext(sparkConf);
-        sparkContext.setCheckpointDir(CHECKPOINT_PATH);
+        try {
+            appName = SPARK_APP_NAME;
+            master = SPARK_MASTER;
+            sparkConf = new SparkConf().setAppName(appName).setMaster(master)
+                    .setJars(new String[]{"/Users/panpan/Documents/Code/Java/spark/target/spark.jar"});
+            sparkContext = new JavaSparkContext(sparkConf);
+            sparkContext.setCheckpointDir(CHECKPOINT_PATH);
+        } catch (Exception e) {
+            logger.error("SparkInit(): " + e.getMessage());
+        }
+
     }
 
     /**

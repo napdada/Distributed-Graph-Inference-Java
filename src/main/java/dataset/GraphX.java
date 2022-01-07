@@ -252,7 +252,7 @@ public class GraphX implements Serializable {
             writerRes.flush();
             writerRes.close();
         } catch (Exception e) {
-            logger.info(e.getMessage());
+            logger.error("GraphX saveVertexFeat(): " + e.getMessage());
         }
     }
 

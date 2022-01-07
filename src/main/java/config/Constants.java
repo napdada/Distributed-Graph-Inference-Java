@@ -35,8 +35,8 @@ public class Constants {
             CHECKPOINT_FREQUENCY = Integer.parseInt(args[3]);
             MAX_EVENT_NUM = Integer.parseInt(args[4]);
         } catch (Exception e) {
-            logger.error("args 参数配置错误！请正确配置参数！");
-            logger.error("args 参数格式样例: spark.jar [./resources/path] [wikipedia/reddit] [LP/NC/EC] [1/10] [1000]");
+            logger.error("Constants(): args 参数配置错误！请正确配置参数！");
+            logger.error("Constants() :args 参数格式样例: spark.jar [./resources/path] [wikipedia/reddit] [LP/NC/EC] [1/10] [1000]");
         }
 
     }

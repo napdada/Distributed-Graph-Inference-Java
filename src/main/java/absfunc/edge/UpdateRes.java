@@ -75,7 +75,7 @@ public class UpdateRes extends AbstractFunction1<EdgeTriplet<Vdata, Edata>, Edat
                         posEmb[0] = src.toFloatArray();
                         break;
                     default:
-                        logger.error("参数 TASK_NAME 配置错误！");
+                        logger.error("UpdateRes apply(): 参数 TASK_NAME 配置错误！");
                         return e.attr();
                 }
                 DecoderInput decoderInput = new DecoderInput(posEmb, posLabel, negEmb, negLabel);
