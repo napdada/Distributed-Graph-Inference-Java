@@ -46,7 +46,7 @@ public class Encoder {
      */
     Predictor<EncoderInput, EncoderOutput> predictor;
 
-    private static Encoder encoder = new Encoder();
+    private volatile static Encoder encoder;
 
     private Encoder() {
         modelPath = MODEL_PATH;
@@ -63,6 +63,13 @@ public class Encoder {
     }
 
     public static Encoder getInstance() {
+        if (encoder == null) {
+            synchronized (Encoder.class) {
+                if (encoder == null) {
+                    encoder = new Encoder();
+                }
+            }
+        }
         return encoder;
     }
 
@@ -75,7 +82,7 @@ public class Encoder {
         try {
             return predictor.predict(encoderInput);
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error("Encoder infer(): " + e.getMessage());
             return null;
         }
     }

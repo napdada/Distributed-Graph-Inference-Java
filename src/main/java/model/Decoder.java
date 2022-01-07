@@ -46,7 +46,7 @@ public class Decoder {
      */
     Predictor<DecoderInput, DecoderOutput> predictor;
 
-    private static Decoder decoder = new Decoder();
+    private static Decoder decoder;
 
     private Decoder() {
         modelPath = MODEL_PATH;
@@ -58,11 +58,18 @@ public class Decoder {
             translator = new DecoderTranslator();
             predictor = model.newPredictor(translator);
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error("Decoder(): " + e.getMessage());
         }
     }
 
     public static Decoder getInstance() {
+        if (decoder == null) {
+            synchronized (Decoder.class) {
+                if (decoder == null) {
+                    decoder = new Decoder();
+                }
+            }
+        }
         return decoder;
     }
 
@@ -75,7 +82,7 @@ public class Decoder {
         try {
             return predictor.predict(decoderInput);
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error("Decoder infer():" + e.getMessage());
             return null;
         }
     }
