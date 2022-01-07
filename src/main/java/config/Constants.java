@@ -33,7 +33,7 @@ public class Constants {
             DECODER_NAME = "Decoder_" + DATASET_NAME + "_" + TASK_NAME;
             RESULT_PATH = RESOURCE_PATH + "result/" + DATASET_NAME + ".csv";
             CHECKPOINT_FREQUENCY = Integer.parseInt(args[3]);
-            MAX_EVENT_NUM = Integer.parseInt(args[4]);
+            MAX_EVENT_NUM = Integer.parseInt(args[4]) + WARM_UP_NUM;
         } catch (Exception e) {
             logger.error("Constants(): args 参数配置错误！请正确配置参数！");
             logger.error("Constants() :args 参数格式样例: spark.jar [./resources/path] [wikipedia/reddit] [LP/NC/EC] [1/10] [1000]");
@@ -52,6 +52,7 @@ public class Constants {
     /**
      * Spark 集群 URL（eg. "local"、"spark:master7077"）
      */
+//    public static final String SPARK_MASTER = "spark://127.0.0.1:7077";
     public static final String SPARK_MASTER = "local[4]";
     /**
      * 静态资源存储路径
@@ -70,9 +71,13 @@ public class Constants {
      */
     public static int CHECKPOINT_FREQUENCY = 1;
     /**
+     * 预热推理
+     */
+    public static final int WARM_UP_NUM = 10;
+    /**
      * 推理事件最大个数
      */
-    public static int MAX_EVENT_NUM = 1000;
+    public static int MAX_EVENT_NUM = 1000 + WARM_UP_NUM;
     /**
      * Spark init
      */

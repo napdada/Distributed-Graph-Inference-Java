@@ -66,6 +66,21 @@ public class Main {
             long startTime = System.currentTimeMillis();
             log.warn("--- {} 开始推理", new SimpleDateFormat(DATE_FORMAT).format(startTime));
             while ((lineData = bufferedReader.readLine()) != null) {
+                // 3.0 预热（前 WARM_UP_NUM 个不计入结果）
+                if (num == WARM_UP_NUM) {
+                    startTime = System.currentTimeMillis();
+                    createGraphTime = 0L;
+                    mergeTime = 0L;
+                    updateTsTime = 0L;
+                    genNeighborTime = 0L;
+                    encoderTime = 0L;
+                    updateMailboxTime = 0L;
+                    decoderTime = 0L;
+                    evaluateTime = 0L;
+                    count = 0;
+                    log.warn("--- {} 预热结束", new SimpleDateFormat(DATE_FORMAT).format(startTime));
+                }
+
                 // 3.1 读取一个新的事件，并与历史事件一起构图
                 tmpTime = System.currentTimeMillis();
                 line = lineData.split(",");
@@ -137,7 +152,7 @@ public class Main {
 
             // 4. 输出结果（耗时、准确率）
             long endTime = System.currentTimeMillis();
-            float n = num;
+            float n = num - WARM_UP_NUM;
             log.warn("--- {} 推理结束", new SimpleDateFormat(DATE_FORMAT).format(endTime));
             log.warn("--- total:    {} ms, avg: {} ms", endTime - startTime, (endTime - startTime) / n);
             log.warn("--- create:   {} ms, avg: {} ms", createGraphTime, createGraphTime / n);
