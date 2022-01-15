@@ -21,7 +21,7 @@ import static config.Constants.*;
 public class Main {
 
     public static void main(String[] args) {
-        int i = 0, experimentNum = 10;
+        int i = 0, experimentNum = 1;   // 10
         while (i < experimentNum) {
             Main main = new Main();
             main.graphInfer(args);
@@ -57,9 +57,9 @@ public class Main {
             long initTime = sparkStartTime,
                     createGraphTime = 0, mergeTime = 0,
                     updateTsTime = 0, genNeighborTime = 0,
-                    encoderTime = 0, updateMailboxTime = 0,
-                    decoderTime = 0, evaluateTime = 0,
-                    tmpTime;                            // 用于统计各步骤耗时
+                    sendEmbTime = 0, encoderTime = 0,
+                    updateMailboxTime = 0, decoderTime = 0,
+                    evaluateTime = 0, tmpTime;          // 用于统计各步骤耗时
             log.warn("--- 初始化配置耗时：{} ms", System.currentTimeMillis() - initTime);
 
             // 3. 图推理迭代
@@ -74,6 +74,7 @@ public class Main {
                     updateTsTime = 0L;
                     genNeighborTime = 0L;
                     encoderTime = 0L;
+                    sendEmbTime = 0L;
                     updateMailboxTime = 0L;
                     decoderTime = 0L;
                     evaluateTime = 0L;
@@ -112,10 +113,15 @@ public class Main {
                 graphX.event2DSubgraph(srcID, dstID);
                 genNeighborTime += System.currentTimeMillis() - tmpTime;
 
-                // 3.6 调用 encoder 进行图推理，并更新点 feat
+                // 3.6.1 调用 encoder 进行单点推理，并更新 src feat
                 tmpTime = System.currentTimeMillis();
                 graphX.encoder(srcID, dstID);
                 encoderTime += System.currentTimeMillis() - tmpTime;
+
+                // 3.6.2 将推理结果以 msg 发生发送给二度子图，并更新 feat
+                tmpTime = System.currentTimeMillis();
+                graphX.sendEmd(srcID, dstID);
+                sendEmbTime += System.currentTimeMillis() - tmpTime;
 
                 // 3.7 更新点的 mailbox
                 tmpTime = System.currentTimeMillis();
@@ -160,6 +166,7 @@ public class Main {
             log.warn("--- updateTs: {} ms, avg: {} ms", updateTsTime, updateTsTime / n);
             log.warn("--- neighbor: {} ms, avg: {} ms", genNeighborTime, genNeighborTime / n);
             log.warn("--- encoder:  {} ms, avg: {} ms", encoderTime, encoderTime / n);
+            log.warn("--- sendEmb:  {} ms, avg: {} ms", sendEmbTime, sendEmbTime / n);
             log.warn("--- mailbox:  {} ms, avg: {} ms", updateMailboxTime, updateMailboxTime / n);
             log.warn("--- decoder:  {} ms, avg: {} ms", decoderTime, decoderTime / n);
             log.warn("--- evaluate: {} ms, avg: {} ms", evaluateTime, evaluateTime / n);

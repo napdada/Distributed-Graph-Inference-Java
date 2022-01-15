@@ -189,7 +189,14 @@ public class GraphX implements Serializable {
      */
     public void encoder(Long src, Long dst) {
         graph = graph.mapVertices(new UpdateFeat(src), VDATA_CLASS_TAG, tpEquals());
+    }
 
+    /**
+     * 通过 send embedding msg 方式将 embedding 结果发给二度子图中所有点，并更新 feat
+     * @param src srd ID
+     * @param dst dst ID
+     */
+    public void sendEmd(Long src, Long dst) {
         graph = graph.ops().pregel(new HashMap<>(), 3, EdgeDirection.Out(),
                 new UpdateEmb(), new SendEmb(src, dst), new MergeEmb(), EMBEDDING_MAP_CLASS_TAG);
     }
