@@ -23,12 +23,17 @@ import java.util.Map;
 @Setter
 public class UpdateFeat extends AbstractFunction2<Object, Vdata, Vdata> implements Serializable {
     /**
-     * 点 ID
+     * src ID
      */
     private Long src;
+    /**
+     * dst ID
+     */
+    private Long dst;
 
-    public UpdateFeat(Long src) {
+    public UpdateFeat(Long src, Long dst) {
         this.src = src;
+        this.dst = dst;
     }
 
     /**
@@ -41,9 +46,15 @@ public class UpdateFeat extends AbstractFunction2<Object, Vdata, Vdata> implemen
      */
     @Override
     public Vdata apply(Object vID, Vdata v) {
-        if (vID.equals(src)) {
+        if (vID.equals(src) || vID.equals(dst)) {
             HashMap<Long, float[]> embedding = new HashMap<>();
             HashMap<Long, Vfeat> map = v.getEventSubgraph2DFeat();
+            if (map == null) {
+                map = new HashMap<>();
+            } else if (map.size() == 0){
+                Vfeat vfeat = new Vfeat(v);
+                map.put((Long) vID, vfeat);
+            }
             int num = map.size(), i = 0;
             long[] index = new long[num];
             float[][] feat = new float[num][];

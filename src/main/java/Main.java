@@ -109,9 +109,9 @@ public class Main {
                 updateTsTime += System.currentTimeMillis() - tmpTime;
 
                 // 3.5 生成基于新事件的二度子图
-                tmpTime = System.currentTimeMillis();
-                graphX.event2DSubgraph(srcID, dstID);
-                genNeighborTime += System.currentTimeMillis() - tmpTime;
+//                tmpTime = System.currentTimeMillis();
+//                graphX.event2DSubgraph(srcID, dstID);
+//                genNeighborTime += System.currentTimeMillis() - tmpTime;
 
                 // 3.6.1 调用 encoder 进行单点推理，并更新 src feat
                 tmpTime = System.currentTimeMillis();
@@ -119,14 +119,14 @@ public class Main {
                 encoderTime += System.currentTimeMillis() - tmpTime;
 
                 // 3.6.2 将推理结果以 msg 发生发送给二度子图，并更新 feat
-                tmpTime = System.currentTimeMillis();
-                graphX.sendEmd(srcID, dstID);
-                sendEmbTime += System.currentTimeMillis() - tmpTime;
+//                tmpTime = System.currentTimeMillis();
+//                graphX.sendEmd(srcID, dstID);
+//                sendEmbTime += System.currentTimeMillis() - tmpTime;
 
                 // 3.7 更新点的 mailbox
-                tmpTime = System.currentTimeMillis();
-                graphX.updateMailbox();
-                updateMailboxTime += System.currentTimeMillis() - tmpTime;
+//                tmpTime = System.currentTimeMillis();
+//                graphX.updateMailbox();
+//                updateMailboxTime += System.currentTimeMillis() - tmpTime;
 
                 // 3.8 调用 decoder 进行 MLP 解码，更新边 logit、label、accuracy
                 tmpTime = System.currentTimeMillis();

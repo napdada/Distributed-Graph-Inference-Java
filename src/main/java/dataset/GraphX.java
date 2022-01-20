@@ -188,7 +188,9 @@ public class GraphX implements Serializable {
      * @param dst dst ID
      */
     public void encoder(Long src, Long dst) {
-        graph = graph.mapVertices(new UpdateFeat(src), VDATA_CLASS_TAG, tpEquals());
+        graph = graph.ops().pregel(new HashMap<>(), 1, EdgeDirection.Out(),
+                new Update2DSubgraph(), new SendV(src, dst), new MergeV(), SUBGRAPH_MAP_CLASS_TAG);
+        graph = graph.mapVertices(new UpdateFeat(src, dst), VDATA_CLASS_TAG, tpEquals());
     }
 
     /**
