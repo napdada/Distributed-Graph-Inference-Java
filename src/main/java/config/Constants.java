@@ -53,7 +53,7 @@ public class Constants {
      * Spark 集群 URL（eg. "local"、"spark:master7077"）
      */
 //    public static final String SPARK_MASTER = "spark://127.0.0.1:7077";
-    public static final String SPARK_MASTER = "local[4]";
+    public static final String SPARK_MASTER = "local[2]";
     /**
      * 静态资源存储路径
      */
@@ -179,7 +179,7 @@ public class Constants {
     /**
      * GraphX 分区数量
      */
-    public static final int PARTITION_NUM = 4;
+    public static final int PARTITION_NUM = 2;
     /**
      * mailbox 的最大容量
      */
