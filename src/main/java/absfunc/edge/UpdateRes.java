@@ -82,8 +82,8 @@ public class UpdateRes extends AbstractFunction1<EdgeTriplet<Vdata, Edata>, Edat
                 DecoderInput decoderInput = new DecoderInput(posEmb, posLabel, negEmb, negLabel);
                 DecoderOutput decoderOutput = decoder.infer(decoderInput);
                 float[] logit = decoderOutput.getLogic();
-                logit[0] = logit[0] > 0.5 ? 1 : 0;
                 if (TASK_NAME.equals("LP")) {
+                    logit[0] = logit[0] > 0.5 ? 1 : 0;
                     logit[1] = logit[1] > 0.5 ? 1 : 0;
                 }
 
