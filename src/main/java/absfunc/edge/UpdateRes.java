@@ -85,6 +85,10 @@ public class UpdateRes extends AbstractFunction1<EdgeTriplet<Vdata, Edata>, Edat
                 if (TASK_NAME.equals("LP")) {
                     logit[0] = logit[0] > 0.5 ? 1 : 0;
                     logit[1] = logit[1] > 0.5 ? 1 : 0;
+                } else if (TASK_NAME.equals("NC")) {
+                    logit[0] = logit[0] > 0.5 ? 1 : 0;
+                } else if (TASK_NAME.equals("EC")) {
+                    logit[0] = logit[0] > 0.5 ? 0 : 1;
                 }
 
                 NDArray logits = manager.create(decoderOutput.getLogic());
