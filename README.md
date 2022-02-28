@@ -18,10 +18,30 @@ The framework is mainly composed of the following modules: incremental compositi
 | development tool    | IntelliJ IDEA 2020.1.2                               |
 | running environment | Spark 3.2.0, Hadoop 3.3.0, Scala 2.12.15, Java 1.8.0 |
 
-## Dataset
+## Run
+
+You can open the project directly in IDEA, configure the environment, and set the running parameters, then run `Main.java` directly.
+
+### Configurable parameters
+
+```shell
+Execute command parameter order:
+command RESOURCE_PATH DATASET_NAME TASK_NAME CHECKPOINT_FREQUENCY MAX_EVENT_NUM
+
+1. RESOURCE_PATH: Static resource(dataset/model/log/checkpoint/result) path
+2. DATASET_NAME: Dataset name(Wikipedia or Reddit)
+3. TASK_NAME: The name of the task performed(LP/NC/EC)
+4. CHECKPOINT_FREQUENCY: Frequency of truncating RDD lineages(1/2/.../10)
+5. MAX_EVENT_NUM: Maximum number of inference events(100/200/500/1000/...)
+
+Execute command parameter example:
+command /Users/xxx/project/src/main/resources/ wikipedia LP 3 1500
+```
+
+### Dataset
 
 [Wikipedia and Reddit](http://snap.stanford.edu/jodie/#datasets)
 
-## GNN Model
+### GNN Model
 
 An example of a model in the path（`./src/main/resources/model/`）.
